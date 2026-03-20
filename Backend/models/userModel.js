@@ -1,29 +1,31 @@
-let mongoose = require('mongoose')
+const mongoose = require('mongoose')
 
-let userSchema = mongoose.Schema({
-    "_id": String,
-    "name": String,
-    "email": String,
-    "password": String,
-    "role": {
+const userSchema = new mongoose.Schema({
+    name: {
         type: String,
-        enum: ["Admin", "Teacher", "Student"],
+        required: true,
+        trim: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true,
+        lowercase: true,
+        trim: true
+    },
+    password: {
+        type: String,
         required: true
     },
-
-    "referencemodel": {
+    role: {
         type: String,
-        enum: ["students", "teachers"],
-        required: function () {
-            return this.Role !== "admin";
-        }
-    },
-
-    "referenceid": {
-        type: mongoose.Schema.Types.ObjectId,
-        refPath: "referencemodel"
+        enum: ["teacher", "student"],
+        default: "student",
+        required: true
     }
-
+}, {
+    timestamps: true
 })
 
-module.exports = mongoose.model('users', userSchema)
+module.exports = mongoose.model('user', userSchema)
