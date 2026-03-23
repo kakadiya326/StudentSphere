@@ -2,13 +2,13 @@ const teacherModel = require("../models/teacherModel")
 
 let getProfile = async (req, res) => {
     try {
-        let teacher = await teacherModel.findOne({ _id: req.user._id })
-        if (!teacher) return res.json({ "msg": "Teacher not found" })
-        res.json({ "msg": "Profile fetched successfully", teacher })
+        let teacher = await teacherModel.findOne({ _id: req.user.id })
+        if (!teacher) return res.json({ "error": "Teacher not found" })
+        res.json({ "success": "Profile fetched successfully", teacher })
 
     } catch (error) {
         console.log(error);
-        res.json({ "msg": "Error fetching profile" })
+        res.json({ "error": "Error fetching profile" })
     }
 
 }
@@ -16,14 +16,14 @@ let getProfile = async (req, res) => {
 let profileUpdate = async (req, res) => {
     try {
         let teacher = await teacherModel.findOneAndUpdate(
-            { _id: req.user._id },
+            { _id: req.user.id },
             { $set: req.body },
             { new: true }
         )
-        res.json({ "msg": "Profile updated successfully", teacher })
+        res.json({ "success": "Profile updated successfully", teacher })
     } catch (error) {
         console.log(error);
-        res.json({ "msg": "Error updating profile" })
+        res.json({ "error": "Error updating profile" })
     }
 }
 
@@ -31,10 +31,10 @@ let getAllTeacher = async (req, res) => {
     try {
         let teachers = await teacherModel.find()
         if (!teachers) return res.json({ "msg": "Teachers not found" })
-        res.json({ "msg": "Teacher fetched successfully", teachers })
+        res.json({ "success": "Teacher fetched successfully", teachers })
     } catch (error) {
         console.log(error);
-        res.json({ "msg": "Error fetching teachers" })
+        res.json({ "error": "Error fetching teachers" })
     }
 }
 
@@ -88,22 +88,22 @@ let searchTeachers = async (req, res) => {
             }
         ])
 
-        res.json({ "msg": "Searched teachers", teachers })
+        res.json({ "success": "Searched teachers", teachers })
 
     } catch (e) {
         console.log(e)
-        res.json({ "msg": "Search failed" })
+        res.json({ "error": "Search failed" })
     }
 }
 
 let deleteTeacher = async (req, res) => {
     try {
-        let teacher = await teacherModel.findByIdAndDelete({ _id: req.user._id })
+        let teacher = await teacherModel.findByIdAndDelete({ _id: req.user.id })
         if (!teacher) return res.json({ "msg": "Teacher not found" })
-        res.json({ "msg": "Teacher deleted successfully", teacher })
+        res.json({ "success": "Teacher deleted successfully", teacher })
     } catch (error) {
         console.log(error);
-        res.json({ "msg": "Error deleting teacher" })
+        res.json({ "error": "Error deleting teacher" })
     }
 }
 

@@ -7,16 +7,16 @@ let addStudent = async (req, res) => {
     try {
         let student = await studentModel.findById(req.user.id);
         if (student) {
-            return res.json({ "msg": "Student profile already exists" })
+            return res.json({ "error": "Student profile already exists" })
         }
         let userEnrollment = await generateEnrollment(req.body.department);
         let data = new studentModel({ ...req.body, userId: userEnrollment, _id: req.user.id });
         await data.save();
-        res.json({ "msg": "Student added successfully" })
+        res.json({ "success": "Student added successfully" })
     }
     catch (e) {
         console.log(e);
-        res.json({ "msg": "Error in adding student" })
+        res.json({ "error": "Error in adding student" })
     }
 }
 
@@ -25,12 +25,12 @@ let getStudent = async (req, res) => {
     try {
         let student = await studentModel.findById(req.user.id);
         if (!student) {
-            return res.json({ "msg": "Student profile not found" })
+            return res.json({ "error": "Student profile not found" })
         }
-        res.json({ "msg": "Student profile found", "data": student })
+        res.json({ "success": "Student profile found", "data": student })
     } catch (e) {
         console.log(e);
-        res.json({ "msg": "Error in fetching student" })
+        res.json({ "error": "Error in fetching student" })
     }
 }
 
@@ -39,13 +39,13 @@ let updateStudent = async (req, res) => {
     try {
         let student = await studentModel.findById(req.user.id);
         if (!student) {
-            return res.json({ "msg": "Student profile not found" })
+            return res.json({ "error": "Student profile not found" })
         }
         await studentModel.findByIdAndUpdate(req.user.id, req.body);
-        res.json({ "msg": "Student profile updated successfully" });
+        res.json({ "success": "Student profile updated successfully" });
     } catch (e) {
         console.log(e);
-        res.json({ "msg": "Error in updating student" });
+        res.json({ "error": "Error in updating student" });
     }
 }
 
@@ -54,14 +54,14 @@ let deleteStudent = async (req, res) => {
     try {
         let student = await studentModel.findById(req.user.id);
         if (!student) {
-            return res.json({ "msg": "Student profile not found" })
+            return res.json({ "error": "Student profile not found" })
         }
         await studentModel.findByIdAndDelete(req.user.id);
-        res.json({ "msg": "Student profile deleted successfully" });
+        res.json({ "success": "Student profile deleted successfully" });
     }
     catch (e) {
         console.log(e);
-        res.json({ "msg": "Error in deleting student" })
+        res.json({ "error": "Error in deleting student" })
     }
 }
 
@@ -69,11 +69,11 @@ let deleteStudent = async (req, res) => {
 let getS = async (req, res) => {
     try {
         let students = await studentModel.find();
-        res.json({ "msg": "Students fetched successfully", "data": students });
+        res.json({ "success": "Students fetched successfully", "data": students });
     }
     catch (e) {
         console.log(e);
-        res.json({ "msg": "Error in fetching students" });
+        res.json({ "error": "Error in fetching students" });
     }
 }
 
@@ -82,12 +82,12 @@ let getStudentByEnrollment = async (req, res) => {
     try {
         let student = await studentModel.findOne({ userId: req.params.enrollment });
         if (!student) {
-            return res.json({ "msg": "Student profile not found" })
+            return res.json({ "error": "Student profile not found" })
         }
-        res.json({ "msg": "Student profile found", "data": student })
+        res.json({ "success": "Student profile found", "data": student })
     } catch (e) {
         console.log(e);
-        res.json({ "msg": "Error in fetching student by enrollment" });
+        res.json({ "error": "Error in fetching student by enrollment" });
     }
 }
 
@@ -96,15 +96,15 @@ let addS = async (req, res) => {
     try {
         let student = await userModel.findOne({ "name": req.body.name, "email": req.body.email });
         if (!student) {
-            return res.json({ "msg": "User is not registered" });
+            return res.json({ "error": "User is not registered" });
         }
         let userEnrollment = await generateEnrollment(req.body.department);
         let data = new studentModel({ ...req.body, userId: userEnrollment, _id: student._id });
         await data.save();
-        res.json({ "msg": "Student added successfully" });
+        res.json({ "success": "Student added successfully" });
     } catch (e) {
         console.log(e);
-        res.json({ "msg": "Error in adding student" });
+        res.json({ "error": "Error in adding student" });
     }
 }
 
@@ -113,13 +113,13 @@ let updateS = async (req, res) => {
     try {
         let student = await studentModel.findOne({ userId: req.params.enrollment });
         if (!student) {
-            return res.json({ "msg": "Student profile not found" })
+            return res.json({ "error": "Student profile not found" })
         }
         await studentModel.findByIdAndUpdate(student._id, req.body);
-        res.json({ "msg": "Student profile updated successfully" });
+        res.json({ "success": "Student profile updated successfully" });
     } catch (e) {
         console.log(e);
-        res.json({ "msg": "Error in updating student" });
+        res.json({ "error": "Error in updating student" });
     }
 }
 
@@ -128,13 +128,13 @@ let deleteS = async (req, res) => {
     try {
         let student = await studentModel.findOne({ userId: req.params.enrollment });
         if (!student) {
-            return res.json({ "msg": "Student profile not found" })
+            return res.json({ "error": "Student profile not found" })
         }
         await studentModel.findByIdAndDelete(student._id);
-        res.json({ "msg": "Student profile deleted successfully" });
+        res.json({ "success": "Student profile deleted successfully" });
     } catch (e) {
         console.log(e);
-        res.json({ "msg": "Error in deleting student" });
+        res.json({ "error": "Error in deleting student" });
     }
 }
 
