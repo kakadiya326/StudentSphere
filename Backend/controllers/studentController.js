@@ -49,6 +49,25 @@ let updateStudent = async (req, res) => {
     }
 }
 
+let enrollInSubject = async (req, res) => {
+    try {
+        const studentId = req.user.id
+        const { courseId } = req.body
+
+        let student = await studentModel.findByIdAndUpdate(
+            studentId,
+            {
+                $addToSet: { courseIds: courseId }//to avoid duplicate
+            },
+            { new: true }
+        )
+        res.json({ "success": "Enrolled successfully", student })
+    } catch (error) {
+        console.log(error);
+        res.json({ "error": "Something went wrong." })
+    }
+}
+
 // For student to delete their profile
 let deleteStudent = async (req, res) => {
     try {
@@ -142,7 +161,7 @@ let deleteS = async (req, res) => {
 // Exporting all controller functions
 module.exports = {
     // For student
-    addStudent, getStudent, updateStudent, deleteStudent,
+    addStudent, getStudent, updateStudent, deleteStudent, enrollInSubject,
 
     // For admin
     getS, getStudentByEnrollment, addS, updateS, deleteS

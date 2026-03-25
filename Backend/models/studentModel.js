@@ -6,19 +6,26 @@ const studentSchema = new mongoose.Schema({
         ref: 'user',
         required: true
     },
-    userId: {
-        type: String, // reference to User _id
+    enrollment: {
+        type: String, // reference to generated automatic
         required: true
     },
     courseIds: [
         {
-            type: String // courses enrolled
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "subject"
         }
     ],
     progress: [
         {
-            courseId: String,
-            completedLessons: Number
+            courseId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "subject"
+            },
+            completedLessons: {
+                type: Number,
+                default: 0
+            }
         }
     ]
 }, {

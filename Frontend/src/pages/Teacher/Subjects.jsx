@@ -63,7 +63,7 @@ const Subjects = () => {
       {/* Subject List */}
       <ul>
         {
-          subjects.map((subject) => (
+          subjects&&subjects.length>0&&subjects.map((subject) => (
             <li key={subject._id}>{subject.name} - {subject.code}</li>
           ))
         }

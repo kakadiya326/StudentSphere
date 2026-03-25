@@ -3,7 +3,9 @@ import Login from '../pages/Auth/Login'
 import ProtectedRoute from './ProtectedRoute'
 import StudentDashboard from '../pages/Student/Dashboard'
 import TeacherDashboard from '../pages/Teacher/Dashboard'
-import Subjects from '../pages/Teacher/Subjects'
+import TeacherSubjects from '../pages/Teacher/Subjects'
+import StudentSubjects from '../pages/Student/Subjects'
+import MySubjects from '../pages/Student/MySubjects'
 
 const AppRoutes = () => {
     return (
@@ -21,6 +23,25 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+                    path='/student/subjects'
+                    element={
+                        <ProtectedRoute allowedRoles={['student']}>
+                            <StudentSubjects />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path='/student/mySubjects'
+                    element={
+                        <ProtectedRoute allowedRoles={['student']}>
+                            <MySubjects />
+                        </ProtectedRoute>
+                    }
+                />
+
+
+
 
                 {/* Teacher */}
                 <Route
@@ -35,7 +56,7 @@ const AppRoutes = () => {
                     path="/teacher/subjects"
                     element={
                         <ProtectedRoute allowedRoles={["teacher"]}>
-                            <Subjects />
+                            <TeacherSubjects />
                         </ProtectedRoute>
                     }
                 />

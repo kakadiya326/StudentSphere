@@ -1,3 +1,4 @@
+const studentModel = require("../models/studentModel");
 const subjectModel = require("../models/subjectModel");
 const teacherModel = require("../models/teacherModel");
 
@@ -72,4 +73,35 @@ let getMySubjects = async (req, res) => {
     }
 }
 
-module.exports = { createSubject, getSubjects, updateSubject, deleteSubject, getMySubjects }
+//in Use
+let mySubjects = async (req, res) => {
+    try {
+        const studentId = req.user.id
+        let student = await studentModel.findById(studentId).populate("courseIds")
+        res.json({ "success": "All enrolled subjects fetched", "subjects": student.courseIds, "progress": student.progress })
+    } catch (error) {
+        console.log(error);
+        res.json({ "error": "Your enrolled subjects not fetched." })
+    }
+}
+
+//In use
+let updateProgress = async (req, res) => {
+    try {
+        const studentId = req.user.id
+        const { courseId, completedLessons } = req.body
+
+        await studentModel.updateOne(
+            { _id: studentId, "progress.courseId": courseId },
+            {
+                $inc:{"progress.$.completedLessons":1}
+            }
+        )
+
+        res.json({ "success": "Progress updated" })
+    } catch (error) {
+        console.log(error);
+        res.json({ "error": "Error updating progress" })
+    }
+}
+module.exports = { createSubject, getSubjects, updateSubject, deleteSubject, getMySubjects, mySubjects, updateProgress }
