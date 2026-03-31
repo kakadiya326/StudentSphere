@@ -13,7 +13,8 @@ const {
     getSubmissionsForLesson,
     gradeSubmission,
     markLessonComplete
-} = require("../control/lessonCon")
+} = require("../controllers/lessonController")
+const { uploadMultiple } = require("../middleware/uploadFile")
 
 const router = express.Router()
 
@@ -29,8 +30,8 @@ router.put("/reorder", reorderLessons)
 router.post("/:lessonId/assignments", addAssignmentToLesson)
 router.put("/:lessonId/assignments/:assignmentIndex", updateAssignment)
 
-// Student submissions
-router.post("/submit", submitAssignment)
+// Student submissions with file upload
+router.post("/submit", uploadMultiple, submitAssignment)
 router.get("/:lessonId/submissions/student", getStudentSubmissions)
 router.get("/:lessonId/submissions", getSubmissionsForLesson)
 router.put("/submissions/:submissionId/grade", gradeSubmission)

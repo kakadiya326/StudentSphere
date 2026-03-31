@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getLessonsBySubject, createLesson, deleteLesson } from '../../services/lessonService'
+import { getLessonsBySubject, createLesson, updateLesson, deleteLesson, reorderLessons } from '../../services/lessonService'
 import Toast from '../../components/Toast'
 
 const TeacherLessons = () => {
@@ -11,7 +11,15 @@ const TeacherLessons = () => {
     const [message, setMessage] = useState("")
     const [type, setType] = useState("")
     const [showCreateForm, setShowCreateForm] = useState(false)
-    const [newLessonTitle, setNewLessonTitle] = useState("")
+    const [editingLessonId, setEditingLessonId] = useState(null)
+    const [isReorderMode, setIsReorderMode] = useState(false)
+    const [draggedLesson, setDraggedLesson] = useState(null)
+    const [lessonForm, setLessonForm] = useState({
+        title: "",
+        description: "",
+        content: "",
+        duration: 0
+    })
 
     const fetchData = async () => {
         try {
@@ -30,23 +38,109 @@ const TeacherLessons = () => {
         fetchData()
     }, [subjectId])
 
-    const handleCreateLesson = async (e) => {
+    const handleFormChange = (e) => {
+        const { name, value } = e.target
+        setLessonForm(prev => ({
+            ...prev,
+            [name]: name === 'duration' ? parseInt(value) || 0 : value
+        }))
+    }
+
+    const handleDragStart = (e, lesson) => {
+        setDraggedLesson(lesson)
+        e.dataTransfer.effectAllowed = 'move'
+    }
+
+    const handleDragOver = (e) => {
         e.preventDefault()
-        if (!newLessonTitle.trim()) return
+        e.dataTransfer.dropEffect = 'move'
+    }
+
+    const handleDrop = async (e, targetLesson) => {
+        e.preventDefault()
+        if (!draggedLesson || draggedLesson._id === targetLesson._id) {
+            setDraggedLesson(null)
+            return
+        }
+
+        // Reorder lessons array
+        const draggedIndex = lessons.findIndex(l => l._id === draggedLesson._id)
+        const targetIndex = lessons.findIndex(l => l._id === targetLesson._id)
+
+        const newLessons = [...lessons]
+        newLessons.splice(draggedIndex, 1)
+        newLessons.splice(targetIndex, 0, draggedLesson)
+
+        // Update order numbers
+        const lessonOrders = newLessons.map((lesson, index) => ({
+            lessonId: lesson._id,
+            order: index
+        }))
 
         try {
-            await createLesson({
-                title: newLessonTitle,
-                subjectId: subjectId
+            await reorderLessons({
+                subjectId: subjectId,
+                lessonOrders: lessonOrders
             })
-            setMessage("Lesson created successfully")
+            setLessons(newLessons)
+            setMessage("Lessons reordered successfully")
             setType("success")
-            setNewLessonTitle("")
-            setShowCreateForm(false)
-            fetchData() // Refresh list
         } catch (error) {
             console.log(error)
-            setMessage("Failed to create lesson")
+            setMessage("Failed to reorder lessons")
+            setType("error")
+        }
+
+        setDraggedLesson(null)
+    }
+
+    const resetForm = () => {
+        setLessonForm({
+            title: "",
+            description: "",
+            content: "",
+            duration: 0
+        })
+        setEditingLessonId(null)
+        setShowCreateForm(false)
+    }
+
+    const handleEditLesson = (lesson) => {
+        setLessonForm({
+            title: lesson.title,
+            description: lesson.description || "",
+            content: lesson.content || "",
+            duration: lesson.duration || 0
+        })
+        setEditingLessonId(lesson._id)
+        setShowCreateForm(true)
+    }
+
+    const handleSaveLesson = async (e) => {
+        e.preventDefault()
+        if (!lessonForm.title.trim() || !lessonForm.description.trim() || !lessonForm.content.trim()) {
+            setMessage("All fields are required")
+            setType("error")
+            return
+        }
+
+        try {
+            if (editingLessonId) {
+                await updateLesson(editingLessonId, lessonForm)
+                setMessage("Lesson updated successfully")
+            } else {
+                await createLesson({
+                    ...lessonForm,
+                    subjectId: subjectId
+                })
+                setMessage("Lesson created successfully")
+            }
+            setType("success")
+            resetForm()
+            fetchData()
+        } catch (error) {
+            console.log(error)
+            setMessage(editingLessonId ? "Failed to update lesson" : "Failed to create lesson")
             setType("error")
         }
     }
@@ -77,19 +171,34 @@ const TeacherLessons = () => {
                     <h1>📚 Lessons</h1>
                     <p style={{ color: '#666', margin: '5px 0' }}>Subject ID: {subjectId}</p>
                 </div>
-                <button
-                    onClick={() => setShowCreateForm(!showCreateForm)}
-                    style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                    }}
-                >
-                    {showCreateForm ? 'Cancel' : '+ New Lesson'}
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                        onClick={() => setIsReorderMode(!isReorderMode)}
+                        style={{
+                            padding: '10px 20px',
+                            backgroundColor: isReorderMode ? '#ffc107' : '#6c757d',
+                            color: isReorderMode ? 'black' : 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {isReorderMode ? '✓ Done Reordering' : '↕️ Reorder Lessons'}
+                    </button>
+                    <button
+                        onClick={() => setShowCreateForm(!showCreateForm)}
+                        style={{
+                            padding: '10px 20px',
+                            backgroundColor: '#007bff',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {showCreateForm ? 'Cancel' : '+ New Lesson'}
+                    </button>
+                </div>
             </div>
 
             <Toast
@@ -106,25 +215,92 @@ const TeacherLessons = () => {
                     marginBottom: '30px',
                     backgroundColor: '#f8f9fa'
                 }}>
-                    <h3>Create New Lesson</h3>
-                    <form onSubmit={handleCreateLesson}>
+                    <h3>{editingLessonId ? 'Edit Lesson' : 'Create New Lesson'}</h3>
+                    <form onSubmit={handleSaveLesson}>
                         <div style={{ marginBottom: '15px' }}>
                             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                                Lesson Title:
+                                Lesson Title: *
                             </label>
                             <input
                                 type="text"
-                                value={newLessonTitle}
-                                onChange={(e) => setNewLessonTitle(e.target.value)}
+                                name="title"
+                                value={lessonForm.title}
+                                onChange={handleFormChange}
                                 required
                                 style={{
                                     width: '100%',
                                     padding: '8px',
                                     border: '1px solid #ccc',
                                     borderRadius: '4px',
-                                    fontSize: '14px'
+                                    fontSize: '14px',
+                                    boxSizing: 'border-box'
                                 }}
                                 placeholder="Enter lesson title"
+                            />
+                        </div>
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                                Description: *
+                            </label>
+                            <textarea
+                                name="description"
+                                value={lessonForm.description}
+                                onChange={handleFormChange}
+                                required
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    fontSize: '14px',
+                                    minHeight: '80px',
+                                    boxSizing: 'border-box',
+                                    fontFamily: 'Arial'
+                                }}
+                                placeholder="Enter lesson description"
+                            />
+                        </div>
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                                Content: *
+                            </label>
+                            <textarea
+                                name="content"
+                                value={lessonForm.content}
+                                onChange={handleFormChange}
+                                required
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    fontSize: '14px',
+                                    minHeight: '150px',
+                                    boxSizing: 'border-box',
+                                    fontFamily: 'Arial'
+                                }}
+                                placeholder="Enter lesson content (text, video links, etc.)"
+                            />
+                        </div>
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                                Duration (minutes):
+                            </label>
+                            <input
+                                type="number"
+                                name="duration"
+                                value={lessonForm.duration}
+                                onChange={handleFormChange}
+                                min="0"
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    fontSize: '14px',
+                                    boxSizing: 'border-box'
+                                }}
+                                placeholder="Estimated duration in minutes"
                             />
                         </div>
                         <div style={{ display: 'flex', gap: '10px' }}>
@@ -139,11 +315,11 @@ const TeacherLessons = () => {
                                     cursor: 'pointer'
                                 }}
                             >
-                                Create Lesson
+                                {editingLessonId ? 'Update Lesson' : 'Create Lesson'}
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setShowCreateForm(false)}
+                                onClick={resetForm}
                                 style={{
                                     padding: '8px 16px',
                                     backgroundColor: '#6c757d',
@@ -174,47 +350,77 @@ const TeacherLessons = () => {
                     </div>
                 ) : (
                     lessons.map((lesson, index) => (
-                        <div key={lesson._id} style={{
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            padding: '20px',
-                            backgroundColor: 'white',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div key={lesson._id}
+                            draggable={isReorderMode}
+                            onDragStart={(e) => handleDragStart(e, lesson)}
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, lesson)}
+                            style={{
+                                border: '1px solid #e0e0e0',
+                                borderRadius: '8px',
+                                padding: '20px',
+                                backgroundColor: draggedLesson?._id === lesson._id ? '#f0f0f0' : 'white',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                opacity: draggedLesson?._id === lesson._id ? 0.5 : 1,
+                                cursor: isReorderMode ? 'grab' : 'default',
+                                transition: 'all 0.3s'
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                 <div style={{ flex: 1 }}>
                                     <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>
+                                        {isReorderMode && <span style={{ marginRight: '10px' }}>☰</span>}
                                         {index + 1}. {lesson.title}
                                     </h3>
-                                    <div style={{ display: 'flex', gap: '15px', fontSize: '14px', color: '#666' }}>
+                                    <p style={{ margin: '8px 0', color: '#555', fontSize: '14px' }}>
+                                        {lesson.description}
+                                    </p>
+                                    <div style={{ display: 'flex', gap: '15px', fontSize: '14px', color: '#666', marginTop: '10px' }}>
                                         <span>📝 {lesson.assignments?.length || 0} assignments</span>
-                                        <span>👥 {lesson.studentCount || 0} students enrolled</span>
-                                        <span>📅 Created {new Date(lesson.createdAt).toLocaleDateString()}</span>
+                                        <span>⏱️ {lesson.duration || 0} minutes</span>
+                                        <span>👥 {lesson.studentCount || 0} students</span>
+                                        <span>📅 {new Date(lesson.createdAt).toLocaleDateString()}</span>
                                     </div>
                                 </div>
-                                <div style={{ display: 'flex', gap: '10px' }}>
+                                <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
                                     <button
                                         onClick={() => navigate(`/teacher/lessons/${lesson._id}`)}
                                         style={{
-                                            padding: '8px 16px',
+                                            padding: '8px 12px',
                                             backgroundColor: '#007bff',
                                             color: 'white',
                                             border: 'none',
                                             borderRadius: '4px',
-                                            cursor: 'pointer'
+                                            cursor: 'pointer',
+                                            fontSize: '14px'
                                         }}
                                     >
                                         Manage
                                     </button>
                                     <button
+                                        onClick={() => handleEditLesson(lesson)}
+                                        style={{
+                                            padding: '8px 12px',
+                                            backgroundColor: '#ffc107',
+                                            color: 'black',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
                                         onClick={() => handleDeleteLesson(lesson._id)}
                                         style={{
-                                            padding: '8px 16px',
+                                            padding: '8px 12px',
                                             backgroundColor: '#dc3545',
                                             color: 'white',
                                             border: 'none',
                                             borderRadius: '4px',
-                                            cursor: 'pointer'
+                                            cursor: 'pointer',
+                                            fontSize: '14px'
                                         }}
                                     >
                                         Delete

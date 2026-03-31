@@ -1,8 +1,6 @@
 let express = require('express')
-const { getSubjects, enrollInSubject, mySubjects, updateProgress, unenrollFromSubject } = require('../control/subjectCon')
-const { getStudentProfile, updateStudentProfile } = require('../control/studentCon')
-// const { addStudent, getStudent, updateStudent, deleteStudent, enrollInSubject } = require('../controllers/studentController')
-// const { getSubjects, mySubjects, updateProgress } = require('../controllers/subjectController')
+const { getSubjects, enrollInSubject, mySubjects, updateProgress, unenrollFromSubject } = require('../controllers/subjectController')
+const { getStudentProfile, updateStudentProfile } = require('../controllers/studentController')
 
 let router = express.Router()
 // /api/student

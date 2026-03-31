@@ -250,11 +250,27 @@ let submitAssignment = async (req, res) => {
             return res.json({ "error": "Not enrolled in this subject" })
         }
 
+        // Handle file uploads
+        const submittedFiles = []
+        if (req.files && req.files.length > 0) {
+            req.files.forEach(file => {
+                submittedFiles.push({
+                    filename: file.filename,
+                    originalName: file.originalname,
+                    mimeType: file.mimetype,
+                    size: file.size,
+                    url: `/uploads/${file.filename}`,
+                    uploadedAt: new Date()
+                })
+            })
+        }
+
         const submission = await submissionModel.findOneAndUpdate(
             { studentId, lessonId, assignmentIndex },
             {
-                answers: answers || [],
+                answers: answers ? JSON.parse(answers) : [],
                 textSubmission: textSubmission || '',
+                submittedFiles: submittedFiles.length > 0 ? submittedFiles : undefined,
                 status: 'submitted',
                 submittedAt: new Date(),
                 maxPoints: lesson.assignments[assignmentIndex]?.maxPoints || 10
@@ -319,7 +335,7 @@ let gradeSubmission = async (req, res) => {
     try {
         const userId = req.user.id
         const { submissionId } = req.params
-        const { grade, feedback } = req.body
+        const { grade, score, feedback } = req.body
 
         // Find the teacher document
         const teacher = await teacherModel.findOne({ userId: userId })
@@ -340,8 +356,9 @@ let gradeSubmission = async (req, res) => {
             return res.json({ "error": "Not authorized to grade this submission" })
         }
 
-        submission.grade = grade
-        submission.feedback = feedback
+        // Accept both 'grade' and 'score' fields for flexibility
+        submission.grade = grade || score
+        submission.feedback = feedback || ''
         submission.status = 'graded'
         submission.gradedAt = new Date()
         submission.gradedBy = teacher._id

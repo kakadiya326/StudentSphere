@@ -15,6 +15,7 @@ import LessonDetails from '../pages/Teacher/LessonDetails'
 import AssignmentGrading from '../pages/Teacher/AssignmentGrading'
 import StudentLessons from '../pages/Student/Lessons'
 import LessonView from '../pages/Student/LessonView'
+import StudentGrades from '../pages/Student/Grades'
 import NaNvbar from '../components/Navbar'
 
 const AppRoutes = () => {
@@ -87,6 +88,14 @@ const AppRoutes = () => {
                     element={
                         <ProtectedRoute allowedRoles={['student']}>
                             <MySubjects />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path='/student/grades'
+                    element={
+                        <ProtectedRoute allowedRoles={['student']}>
+                            <StudentGrades />
                         </ProtectedRoute>
                     }
                 />
