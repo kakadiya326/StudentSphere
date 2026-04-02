@@ -1,6 +1,5 @@
 const teacherModel = require('../models/teacherModel')
 
-// ✅ Get Profile
 let getProfile = async (req, res) => {
     try {
         const teacher = await teacherModel.findOne({ userId: req.user.id }).populate('userId', 'name email').populate('subjects')
@@ -8,11 +7,10 @@ let getProfile = async (req, res) => {
         res.json({ teacher })
 
     } catch (error) {
-        res.json({ error: "Error fetching profile" })
+        res.json({ "error": "Error fetching profile" })
     }
 }
 
-// ✅ Update Profile
 let profileUpdate = async (req, res) => {
     try {
         const teacher = await teacherModel.findOneAndUpdate(
@@ -25,13 +23,13 @@ let profileUpdate = async (req, res) => {
         ).populate('userId', 'name email').populate('subjects')
 
         res.json({
-            success: "Profile updated",
+            "success": "Profile updated",
             teacher
         })
 
     } catch (error) {
         console.log(error)
-        res.json({ error: "Error updating profile" })
+        res.json({ "error": "Error updating profile" })
     }
 }
 

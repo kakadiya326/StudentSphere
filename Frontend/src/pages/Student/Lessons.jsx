@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getLessonsBySubject, getStudentSubmissions } from '../../services/lessonService'
 import Toast from '../../components/Toast'
+import '../../styles/Lessons.css'
 
 const StudentLessons = () => {
     const { subjectId } = useParams()
@@ -79,26 +80,19 @@ const StudentLessons = () => {
     const totalProgress = calculateTotalProgress()
 
     return (
-        <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '30px' }}>
+        <div className="lessons-container">
+            <div className="lessons-header">
                 <div>
-                    <h1>📚 My Lessons</h1>
+                    <h1 className="lessons-title">📚 My Lessons</h1>
                     {subjectInfo && (
-                        <p style={{ color: '#666', margin: '5px 0', fontSize: '16px' }}>
+                        <p className="lessons-subtitle">
                             Subject: <strong>{subjectInfo?.name}</strong> {subjectInfo?.code && `(${subjectInfo.code})`}
                         </p>
                     )}
                 </div>
                 <button
                     onClick={() => navigate('/student/subjects')}
-                    style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#6c757d',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                    }}
+                    className="btn-lessons-secondary"
                 >
                     ← Back to Subjects
                 </button>
@@ -112,34 +106,18 @@ const StudentLessons = () => {
 
             {/* Overall Progress Summary */}
             {lessons.length > 0 && (
-                <div style={{
-                    border: '2px solid #007bff',
-                    borderRadius: '8px',
-                    padding: '20px',
-                    marginBottom: '30px',
-                    backgroundColor: '#f8f9fa'
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <h3 style={{ margin: 0 }}>📊 Subject Progress</h3>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#007bff' }}>
-                            {totalProgress}%
-                        </div>
+                <div className="progress-summary">
+                    <div className="progress-header">
+                        <h3>📊 Subject Progress</h3>
+                        <div className="progress-percentage">{totalProgress}%</div>
                     </div>
-                    <div style={{
-                        width: '100%',
-                        height: '20px',
-                        backgroundColor: '#e9ecef',
-                        borderRadius: '10px',
-                        overflow: 'hidden'
-                    }}>
-                        <div style={{
-                            width: `${totalProgress}%`,
-                            height: '100%',
-                            backgroundColor: totalProgress === 100 ? '#28a745' : '#007bff',
-                            transition: 'width 0.3s'
-                        }} />
+                    <div className="progress-bar">
+                        <div
+                            className="progress-fill"
+                            style={{ width: `${totalProgress}%` }}
+                        ></div>
                     </div>
-                    <p style={{ fontSize: '14px', color: '#666', margin: '10px 0 0 0' }}>
+                    <p className="progress-details">
                         {lessons.reduce((sum, l) => sum + (l.assignments?.length || 0), 0)} total assignments •
                         {submissions.filter(s => s.status === 'graded').length} graded •
                         {submissions.filter(s => s.status === 'submitted').length} pending review
@@ -147,29 +125,14 @@ const StudentLessons = () => {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gap: '20px' }}>
+            <div className="lessons-grid">
                 {lessons.length === 0 ? (
-                    <div style={{
-                        textAlign: 'center',
-                        padding: '60px 40px',
-                        border: '2px dashed #ddd',
-                        borderRadius: '8px',
-                        color: '#666',
-                        backgroundColor: '#f9f9f9'
-                    }}>
-                        <h3 style={{ fontSize: '24px', margin: '0 0 10px 0' }}>📭 No lessons yet</h3>
-                        <p style={{ margin: 0 }}>Your teacher hasn't created any lessons for this subject yet.</p>
+                    <div className="empty-state">
+                        <h3>📭 No lessons yet</h3>
+                        <p>Your teacher hasn't created any lessons for this subject yet.</p>
                         <button
                             onClick={() => navigate('/student/subjects')}
-                            style={{
-                                marginTop: '20px',
-                                padding: '10px 20px',
-                                backgroundColor: '#007bff',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer'
-                            }}
+                            className="btn-empty"
                         >
                             View Other Subjects
                         </button>
@@ -177,107 +140,78 @@ const StudentLessons = () => {
                 ) : (
                     lessons.map((lesson, index) => {
                         const submissionStatus = getSubmissionStatus(lesson._id)
-                        const statusColors = {
-                            completed: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '🎉' },
-                            in_progress: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '📚' },
-                            not_started: { bg: '#f8f9fa', border: '#dee2e6', text: '#6c757d', icon: '📖' }
-                        }
-                        const colors = statusColors[submissionStatus.status]
+                        const statusClass = submissionStatus.status === 'completed' ? 'status-completed' :
+                                          submissionStatus.status === 'in_progress' ? 'status-in-progress' : 'status-not-started'
 
                         return (
-                            <div key={lesson._id} style={{
-                                border: `2px solid ${colors.border}`,
-                                borderRadius: '8px',
-                                padding: '20px',
-                                backgroundColor: colors.bg,
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s',
-                                transform: 'translateY(0)',
-                                display: 'grid',
-                                gridTemplateColumns: 'auto 1fr auto',
-                                gap: '20px',
-                                alignItems: 'center'
-                            }}
+                            <div
+                                key={lesson._id}
+                                className="lesson-card"
                                 onClick={() => navigate(`/student/lessons/${lesson._id}`)}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'
-                                    e.currentTarget.style.transform = 'translateY(-2px)'
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'
-                                    e.currentTarget.style.transform = 'translateY(0)'
-                                }}
                             >
-                                {/* Left: Status Icon */}
-                                <div style={{
-                                    fontSize: '40px',
-                                    textAlign: 'center',
-                                    minWidth: '60px'
-                                }}>
-                                    {colors.icon}
+                                <div className="lesson-header">
+                                    <div>
+                                        <h3 className="lesson-title">
+                                            {index + 1}. {lesson.title}
+                                        </h3>
+                                        <p className="lesson-meta">
+                                            {lesson.duration > 0 && `⏱️ ${lesson.duration} mins`}
+                                        </p>
+                                    </div>
+                                    <span className={`lesson-status ${statusClass}`}>
+                                        {submissionStatus.status === 'completed' ? '✅ COMPLETED' :
+                                            submissionStatus.status === 'in_progress' ? '🔄 IN PROGRESS' : '⏳ START'}
+                                    </span>
                                 </div>
 
-                                {/* Middle: Content */}
-                                <div>
-                                    <h3 style={{ margin: '0 0 8px 0', color: '#333', fontSize: '18px' }}>
-                                        {index + 1}. {lesson.title}
-                                    </h3>
+                                <div className="lesson-content">
                                     {lesson.description && (
-                                        <p style={{ margin: '0 0 12px 0', color: colors.text, fontSize: '14px' }}>
+                                        <p className="lesson-description">
                                             {lesson.description}
                                         </p>
                                     )}
-                                    <div style={{ display: 'flex', gap: '20px', fontSize: '13px', color: colors.text, flexWrap: 'wrap' }}>
-                                        <span>📝 {lesson.assignments?.length || 0} assignments</span>
-                                        {lesson.duration > 0 && <span>⏱️ {lesson.duration} mins</span>}
-                                        <span>✓ {submissionStatus.completed}/{submissionStatus.total} completed</span>
-                                        {submissionStatus.graded > 0 && <span>⭐ {submissionStatus.graded} graded</span>}
+                                    <div className="lesson-details">
+                                        <div className="lesson-detail">
+                                            <span className="detail-label">Assignments</span>
+                                            <span className="detail-value">{lesson.assignments?.length || 0}</span>
+                                        </div>
+                                        <div className="lesson-detail">
+                                            <span className="detail-label">Completed</span>
+                                            <span className="detail-value">{submissionStatus.completed}/{submissionStatus.total}</span>
+                                        </div>
+                                        <div className="lesson-detail">
+                                            <span className="detail-label">Graded</span>
+                                            <span className="detail-value">{submissionStatus.graded}</span>
+                                        </div>
                                     </div>
 
                                     {/* Progress Bar */}
                                     {submissionStatus.total > 0 && (
-                                        <div style={{ marginTop: '12px' }}>
-                                            <div style={{
-                                                width: '100%',
-                                                height: '6px',
-                                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                                borderRadius: '3px',
-                                                overflow: 'hidden'
-                                            }}>
-                                                <div style={{
-                                                    width: `${(submissionStatus.completed / submissionStatus.total) * 100}%`,
-                                                    height: '100%',
-                                                    backgroundColor: submissionStatus.status === 'completed' ? '#28a745' : '#007bff',
-                                                    transition: 'width 0.3s ease'
-                                                }} />
+                                        <div className="lesson-progress">
+                                            <div className="progress-header">
+                                                <span className="progress-label">Progress</span>
+                                                <span className="progress-percentage">
+                                                    {Math.round((submissionStatus.completed / submissionStatus.total) * 100) || 0}%
+                                                </span>
+                                            </div>
+                                            <div className="progress-bar">
+                                                <div
+                                                    className="progress-fill"
+                                                    style={{ width: `${(submissionStatus.completed / submissionStatus.total) * 100}%` }}
+                                                ></div>
                                             </div>
                                         </div>
                                     )}
                                 </div>
 
-                                {/* Right: Status Badge */}
-                                <div style={{
-                                    textAlign: 'center',
-                                    minWidth: '100px'
-                                }}>
-                                    <div style={{
-                                        display: 'inline-block',
-                                        padding: '8px 16px',
-                                        borderRadius: '6px',
-                                        backgroundColor: 'white',
-                                        border: `2px solid ${colors.border}`,
-                                        fontWeight: 'bold',
-                                        fontSize: '14px',
-                                        color: colors.text,
-                                        marginBottom: '8px'
-                                    }}>
-                                        {submissionStatus.status === 'completed' ? '✅ COMPLETED' :
-                                            submissionStatus.status === 'in_progress' ? '🔄 IN PROGRESS' : '⏳ START'}
-                                    </div>
-                                    <div style={{ fontSize: '12px', color: colors.text, fontWeight: '500' }}>
-                                        {Math.round((submissionStatus.completed / submissionStatus.total) * 100) || 0}%
-                                    </div>
+                                <div className="lesson-actions">
+                                    <button
+                                        onClick={() => navigate(`/student/lessons/${lesson._id}`)}
+                                        className="btn-lesson btn-lesson-primary"
+                                    >
+                                        {submissionStatus.status === 'completed' ? '📖 Review Lesson' :
+                                            submissionStatus.status === 'in_progress' ? '📝 Continue' : '🚀 Start Lesson'}
+                                    </button>
                                 </div>
                             </div>
                         )

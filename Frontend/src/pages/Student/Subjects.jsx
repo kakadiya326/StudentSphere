@@ -7,6 +7,7 @@ import {
     unEnrollSubject
 } from '../../services/studentService'
 import Toast from '../../components/Toast'
+import '../../styles/Subjects.css'
 
 const Subjects = () => {
     const navigate = useNavigate()
@@ -85,8 +86,22 @@ const Subjects = () => {
     })
 
     return (
-        <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            <h1>📚 Browse Subjects</h1>
+        <div className="subjects-container">
+            <div className="subjects-header">
+                <h1 className="subjects-title">📚 Browse Subjects</h1>
+                <p className="subjects-subtitle">
+                    Explore and enroll in available subjects to start your learning journey.
+                </p>
+            </div>
+
+            <div className="subjects-actions">
+                <button
+                    onClick={() => navigate('/student/dashboard')}
+                    className="btn-subjects-secondary"
+                >
+                    ← Back to Dashboard
+                </button>
+            </div>
 
             <Toast
                 msgText={message}
@@ -95,243 +110,131 @@ const Subjects = () => {
             />
 
             {/* Stats Section */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '15px',
-                marginBottom: '30px'
-            }}>
-                <div style={{
-                    backgroundColor: '#e7f3ff',
-                    padding: '15px',
-                    borderRadius: '8px',
-                    border: '2px solid #007bff'
-                }}>
-                    <h4 style={{ margin: '0 0 5px 0', color: '#007bff' }}>Total Subjects</h4>
-                    <p style={{ margin: '0', fontSize: '24px', fontWeight: 'bold', color: '#007bff' }}>
-                        {subjects.length}
-                    </p>
+            <div className="stats-grid">
+                <div className="stat-card">
+                    <div className="stat-number">{subjects.length}</div>
+                    <div className="stat-label">Total Subjects</div>
                 </div>
-                <div style={{
-                    backgroundColor: '#e8f5e9',
-                    padding: '15px',
-                    borderRadius: '8px',
-                    border: '2px solid #28a745'
-                }}>
-                    <h4 style={{ margin: '0 0 5px 0', color: '#28a745' }}>Enrolled</h4>
-                    <p style={{ margin: '0', fontSize: '24px', fontWeight: 'bold', color: '#28a745' }}>
-                        {mySubjects.length}
-                    </p>
+                <div className="stat-card">
+                    <div className="stat-number">{mySubjects.length}</div>
+                    <div className="stat-label">Enrolled</div>
                 </div>
-                <div style={{
-                    backgroundColor: '#fff3e0',
-                    padding: '15px',
-                    borderRadius: '8px',
-                    border: '2px solid #ff9800'
-                }}>
-                    <h4 style={{ margin: '0 0 5px 0', color: '#ff9800' }}>Available</h4>
-                    <p style={{ margin: '0', fontSize: '24px', fontWeight: 'bold', color: '#ff9800' }}>
-                        {subjects.length - mySubjects.length}
-                    </p>
+                <div className="stat-card">
+                    <div className="stat-number">{subjects.length - mySubjects.length}</div>
+                    <div className="stat-label">Available</div>
                 </div>
             </div>
 
-            {/* Search and Filter Section */}
-            <div style={{
-                display: 'flex',
-                gap: '15px',
-                marginBottom: '25px',
-                flexWrap: 'wrap',
-                alignItems: 'center'
-            }}>
-                <div style={{ flex: 1, minWidth: '250px' }}>
+            {/* Filter Section */}
+            <div className="filter-section">
+                <div className="filter-group">
+                    <label className="filter-label">Search Subjects</label>
                     <input
                         type="text"
-                        placeholder="Search by subject name or code..."
+                        placeholder="Search by name or code..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            border: '2px solid #ddd',
-                            borderRadius: '4px',
-                            fontSize: '14px'
-                        }}
+                        className="filter-input"
                     />
                 </div>
-                <div>
+                <div className="filter-group">
+                    <label className="filter-label">Filter by Status</label>
                     <select
                         value={filterByStatus}
                         onChange={(e) => setFilterByStatus(e.target.value)}
-                        style={{
-                            padding: '12px',
-                            border: '2px solid #ddd',
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            cursor: 'pointer'
-                        }}
+                        className="filter-select"
                     >
                         <option value="all">All Subjects</option>
-                        <option value="available">Available to Enroll</option>
-                        <option value="enrolled">My Enrolled Subjects</option>
+                        <option value="available">Available</option>
+                        <option value="enrolled">Enrolled</option>
                     </select>
                 </div>
             </div>
 
             {/* Subjects Grid */}
-            {loading ? (
-                <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <p>Loading subjects...</p>
-                </div>
-            ) : filteredSubjects.length > 0 ? (
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                    gap: '20px'
-                }}>
-                    {filteredSubjects.map((subject) => {
+            <div className="subjects-grid">
+                {loading ? (
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                    </div>
+                ) : filteredSubjects.length > 0 ? (
+                    filteredSubjects.map((subject) => {
                         const enrolled = isEnrolled(subject._id)
                         return (
-                            <div
-                                key={subject._id}
-                                style={{
-                                    border: enrolled ? '2px solid #28a745' : '1px solid #e0e0e0',
-                                    borderRadius: '8px',
-                                    padding: '20px',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                    backgroundColor: '#fff',
-                                    transition: 'all 0.3s ease',
-                                    position: 'relative'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-4px)'
-                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)'
-                                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'
-                                }}
-                            >
-                                {enrolled && (
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '10px',
-                                        right: '10px',
-                                        backgroundColor: '#28a745',
-                                        color: 'white',
-                                        padding: '4px 12px',
-                                        borderRadius: '20px',
-                                        fontSize: '12px',
-                                        fontWeight: 'bold'
-                                    }}>
-                                        ✓ Enrolled
+                            <div key={subject._id} className="subject-card">
+                                <div className="subject-header">
+                                    <div>
+                                        <h3 className="subject-title">{subject.name}</h3>
+                                        <p className="subject-code">{subject.code}</p>
                                     </div>
-                                )}
-
-                                <div style={{ marginBottom: '15px' }}>
-                                    <h3 style={{ margin: '0 0 5px 0', color: '#333' }}>
-                                        {subject.name}
-                                    </h3>
-                                    <p style={{ margin: '0', color: '#666', fontSize: '13px' }}>
-                                        <strong>Code:</strong> {subject.code}
-                                    </p>
+                                    <span className={`subject-status ${enrolled ? 'status-enrolled' : 'status-available'}`}>
+                                        {enrolled ? 'Enrolled' : 'Available'}
+                                    </span>
                                 </div>
 
-                                <div style={{
-                                    backgroundColor: '#f5f5f5',
-                                    padding: '12px',
-                                    borderRadius: '4px',
-                                    marginBottom: '15px'
-                                }}>
-                                    <p style={{ margin: '5px 0', fontSize: '13px', color: '#666' }}>
-                                        <strong>👨‍🏫 Teacher:</strong> {subject.teacherId?.userId?.name || 'N/A'}
-                                    </p>
-                                    <p style={{ margin: '5px 0', fontSize: '13px', color: '#666' }}>
-                                        <strong>📧 Email:</strong> {subject.teacherId?.userId?.email || 'N/A'}
-                                    </p>
-                                    <p style={{ margin: '5px 0', fontSize: '13px', color: '#666' }}>
-                                        <strong>🏢 Department:</strong> {subject.teacherId?.department || 'N/A'}
-                                    </p>
+                                <div className="subject-content">
+                                    <p className="subject-description">{subject.description}</p>
+
+                                    <div className="subject-details">
+                                        <div className="subject-detail">
+                                            <span className="detail-label">Teacher</span>
+                                            <span className="subject-value">{subject.teacherId?.userId?.name || 'Not assigned'}</span>
+                                        </div>
+                                        <div className="subject-detail">
+                                            <span className="detail-label">Lessons</span>
+                                            <span className="subject-value">{subject.lessons?.length || 0}</span>
+                                        </div>
+                                        <div className="subject-detail">
+                                            <span className="detail-label">Students</span>
+                                            <span className="subject-value">{subject.enrolledStudents?.length || 0}</span>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div style={{ display: 'flex', gap: '10px' }}>
+                                <div className="subject-actions">
                                     {enrolled ? (
                                         <>
                                             <button
-                                                onClick={() => {
-                                                    const confirm = window.confirm("Are you sure you want to unenroll?");
-                                                    if (confirm) {
-                                                        handleUnenroll(subject._id);
-                                                    }
-                                                }}
-                                                style={{
-                                                    flex: 1,
-                                                    padding: '10px',
-                                                    backgroundColor: '#dc3545',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                    fontWeight: 'bold',
-                                                    fontSize: '14px'
-                                                }}
-                                            >
-                                                Unenroll
-                                            </button>
-                                            <button
                                                 onClick={() => navigate(`/student/subjects/${subject._id}/lessons`)}
-                                                style={{
-                                                    flex: 1,
-                                                    padding: '10px',
-                                                    backgroundColor: '#007bff',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                    fontWeight: 'bold',
-                                                    fontSize: '14px'
-                                                }}
+                                                className="btn-subject btn-subject-primary"
                                             >
                                                 📚 View Lessons
+                                            </button>
+                                            <button
+                                                onClick={() => handleUnenroll(subject._id)}
+                                                className="btn-subject btn-subject-secondary"
+                                            >
+                                                ❌ Unenroll
                                             </button>
                                         </>
                                     ) : (
                                         <button
                                             onClick={() => handleEnroll(subject._id)}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px',
-                                                backgroundColor: '#28a745',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                fontWeight: 'bold',
-                                                fontSize: '14px'
-                                            }}
+                                            className="btn-subject btn-subject-success"
                                         >
-                                            Enroll Now
+                                            ✅ Enroll
                                         </button>
                                     )}
                                 </div>
                             </div>
                         )
-                    })}
-                </div>
-            ) : (
-                <div style={{
-                    textAlign: 'center',
-                    padding: '40px',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '8px',
-                    border: '2px dashed #ddd'
-                }}>
-                    <h3>No subjects found</h3>
-                    <p style={{ color: '#666' }}>
-                        {searchTerm ? 'Try adjusting your search terms' : 'No subjects available'}
-                    </p>
-                </div>
-            )}
+                    })
+                ) : (
+                    <div className="empty-state">
+                        <h3>No subjects found</h3>
+                        <p>Try adjusting your search or filter criteria.</p>
+                        <button
+                            onClick={() => {
+                                setSearchTerm('')
+                                setFilterByStatus('all')
+                            }}
+                            className="btn-empty"
+                        >
+                            Clear Filters
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

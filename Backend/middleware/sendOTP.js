@@ -11,7 +11,7 @@ const sendOTP = async (req, res) => {
         const existing = await otpModel.findOne({ email: email });
 
         if (existing && Date.now() < existing.createdAt.getTime() + 60000) {
-            return res.json({ "msg": "Wait 60 seconds before requesting again" });
+            return res.json({ "warning": "Wait 60 seconds before requesting again" });
         }
 
         const otp = generateOTP();
@@ -28,14 +28,14 @@ const sendOTP = async (req, res) => {
 
         let result = await sendOTPEmail(email, otp);
         if (!result) {
-            return res.json({ "msg": "Failed to send OTP" });
+            return res.json({ "error": "Failed to send OTP" });
         } else {
-            return res.json({ "msg": "OTP sent successfully" });
+            return res.json({ "success": "OTP sent successfully" });
         }
 
     } catch (err) {
         console.log(err);
-        res.json({ "msg": "Failed to send OTP" });
+        res.json({ "error": "Failed to send OTP" });
     }
 };
 

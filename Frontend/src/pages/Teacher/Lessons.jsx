@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getLessonsBySubject, createLesson, updateLesson, deleteLesson, reorderLessons } from '../../services/lessonService'
+import { getTeacherLessonsBySubject, createLesson, updateLesson, deleteLesson, reorderLessons } from '../../services/lessonService'
 import Toast from '../../components/Toast'
 
 const TeacherLessons = () => {
@@ -18,12 +18,11 @@ const TeacherLessons = () => {
         title: "",
         description: "",
         content: "",
-        duration: 0
+        duration: 0,
     })
-
     const fetchData = async () => {
         try {
-            const res = await getLessonsBySubject(subjectId)
+            const res = await getTeacherLessonsBySubject(subjectId)
             setLessons(res.data.lessons || [])
         } catch (error) {
             console.log(error)
@@ -129,10 +128,20 @@ const TeacherLessons = () => {
                 await updateLesson(editingLessonId, lessonForm)
                 setMessage("Lesson updated successfully")
             } else {
-                await createLesson({
-                    ...lessonForm,
-                    subjectId: subjectId
-                })
+                const formData = new FormData()
+
+                formData.append("title", lessonForm.title)
+                formData.append("description", lessonForm.description)
+                formData.append("content", lessonForm.content)
+                formData.append("subjectId", subjectId)
+                formData.append("duration", lessonForm.duration)
+
+                // 🔥 MUST stringify arrays
+                // formData.append("assignments", JSON.stringify(lessonForm.assignments))
+                // formData.append("resources", JSON.stringify(lessonForm.resources))
+                await createLesson(
+                    formData
+                )
                 setMessage("Lesson created successfully")
             }
             setType("success")

@@ -6,21 +6,21 @@ let verifyOTP = async (req, res, next) => {
 
         const record = await otpModel.findOne({ email: email });
 
-        if (!record) return res.json({ "msg": "No OTP found" })
+        if (!record) return res.json({ "warning": "Send OTP to registered email address" })
 
         if (Date.now() > record.expiresAt) {
             await otpModel.deleteOne({ email: email });
-            return res.json({ "msg": "OTP expired" });
+            return res.json({ "warning": "OTP expired" });
         }
 
-        if (record.otp !== otp) return res.json({ "msg": "Invalid OTP" })
+        if (record.otp !== otp) return res.json({ "error": "Invalid OTP" })
 
         await otpModel.deleteOne({ email: email });
         next();
 
     } catch (error) {
         console.log(error);
-        res.json({ "msg": "Error in verifying OTP" })
+        res.json({ "error": "Error in verifying OTP" })
     }
 }
 

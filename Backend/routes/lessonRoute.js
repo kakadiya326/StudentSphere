@@ -1,40 +1,20 @@
 const express = require("express")
-const {
-    createLesson,
-    getLessonsBySubject,
-    getLesson,
-    updateLesson,
-    deleteLesson,
-    reorderLessons,
-    addAssignmentToLesson,
-    updateAssignment,
-    submitAssignment,
-    getStudentSubmissions,
-    getSubmissionsForLesson,
-    gradeSubmission,
-    markLessonComplete
-} = require("../controllers/lessonController")
+const { createLesson, getLessonsBySubject, getLesson, updateLesson, deleteLesson, reorderLessons } = require("../controllers/lessonController")
 const { uploadMultiple } = require("../middleware/uploadFile")
+const multer = require('multer')
+
+const storage = multer.memoryStorage() // or diskStorage
+const upload = multer({ storage })
 
 const router = express.Router()
+// /api/teacher/lesson
 
 // Lesson CRUD
-router.post("/", createLesson)
+router.post("/", upload.none(), createLesson)
 router.get("/subject/:subjectId", getLessonsBySubject)
 router.get("/:id", getLesson)
 router.put("/:id", updateLesson)
 router.delete("/:id", deleteLesson)
 router.put("/reorder", reorderLessons)
-
-// Assignment management (Teacher only)
-router.post("/:lessonId/assignments", addAssignmentToLesson)
-router.put("/:lessonId/assignments/:assignmentIndex", updateAssignment)
-
-// Student submissions with file upload
-router.post("/submit", uploadMultiple, submitAssignment)
-router.get("/:lessonId/submissions/student", getStudentSubmissions)
-router.get("/:lessonId/submissions", getSubmissionsForLesson)
-router.put("/submissions/:submissionId/grade", gradeSubmission)
-router.post("/complete", markLessonComplete)
 
 module.exports = router

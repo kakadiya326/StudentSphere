@@ -24,7 +24,38 @@ const Navbar = () => {
                 📚 StudentSphere
             </h3>
             <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                {user && (
+                {!user ? (
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                        <button
+                            onClick={() => navigate('/')}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#007bff',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: '500'
+                            }}
+                        >
+                            Login
+                        </button>
+                        <button
+                            onClick={() => navigate('/register')}
+                            style={{
+                                padding: '6px 12px',
+                                backgroundColor: '#28a745',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: '500'
+                            }}
+                        >
+                            Sign Up
+                        </button>
+                    </div>
+                ) : (
                     <>
                         {/* Student Navigation */}
                         {user.role === 'student' && (

@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Login from '../pages/Auth/Login'
+import Register from '../pages/Auth/Register'
 import ProtectedRoute from './ProtectedRoute'
 import StudentDashboard from '../pages/Student/Dashboard'
 import TeacherDashboard from '../pages/Teacher/Dashboard'
@@ -8,7 +9,6 @@ import StudentSubjects from '../pages/Student/Subjects'
 import StudentProfile from '../pages/Student/Profile'
 import CompleteProfile from '../components/CompleteProfile'
 import CompleteTeacherProfile from '../components/CompleteTeacherProfile'
-import MySubjects from '../pages/Student/MySubjects'
 import MyProfile from '../pages/Teacher/MyProfile'
 import TeacherLessons from '../pages/Teacher/Lessons'
 import LessonDetails from '../pages/Teacher/LessonDetails'
@@ -25,6 +25,7 @@ const AppRoutes = () => {
             <Routes>
                 {/* Public */}
                 <Route path='/' element={<Login />} />
+                <Route path='/register' element={<Register />} />
 
                 {/* Student */}
                 <Route
@@ -80,14 +81,6 @@ const AppRoutes = () => {
                     element={
                         <ProtectedRoute allowedRoles={['student']}>
                             <LessonView />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path='/student/mySubjects'
-                    element={
-                        <ProtectedRoute allowedRoles={['student']}>
-                            <MySubjects />
                         </ProtectedRoute>
                     }
                 />

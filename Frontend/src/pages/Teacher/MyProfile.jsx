@@ -35,8 +35,10 @@ const MyProfile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
-            await updateTeacherProfile(form)
+            let res=await updateTeacherProfile(form)
             setMessage("Profile updated successfully")
+            console.log(res.data);
+            
             setType("success")
             fetchProfile() // Refresh profile
         } catch (error) {

@@ -14,19 +14,20 @@ let createSubject = async (req, res) => {
             { upsert: true, new: true }
         )
 
+        // teacherId must reference teacher document (_id), not userId
         let subject = new subjectModel({ name, code, teacherId: teacher._id })
 
         await subject.save()
 
         await teacherModel.findByIdAndUpdate(
             teacher._id,
-            { $push: { subjects: subject._id } }
+            { $addToSet: { subjects: subject._id } }
         )
 
-        res.json({ "success": "Subject created" })
+        res.status(201).json({ success: 'Subject created', subject })
     } catch (error) {
-        console.log(error);
-        res.json({ "error": "Error creating subject" })
+        console.error(error)
+        res.status(500).json({ error: 'Error creating subject' })
     }
 }
 
@@ -41,13 +42,12 @@ let getSubjects = async (req, res) => {
         let subjects = await subjectModel
             .find(filter)
             .populate({
-                path: "teacherId", // 👉 first populate teacher
+                path: "teacherId",
                 populate: {
-                    path: "userId", // 👉 then populate user inside teacher
+                    path: "userId",
                     select: "name email"
                 }
             })
-
 
         console.log(subjects);
         res.json({ subjects })
@@ -60,27 +60,31 @@ let getSubjects = async (req, res) => {
 
 let updateSubject = async (req, res) => {
     try {
-        const userId = req.user.id
+        const userId = req.user.id;
+        const subjectId = req.params?.id;
 
         // Find the teacher document
         const teacher = await teacherModel.findOne({ userId: userId })
         if (!teacher) {
-            return res.json({ "error": "Teacher profile not found" })
+            return res.json({ "warning": "Update your profile." })
         }
 
+        if (!subjectId) return res.json({ "warning": "Subject id not selected" })
+
         let subject = await subjectModel.findOneAndUpdate(
-            { _id: req.params.id, teacherId: teacher._id },
+            { _id: subjectId, teacherId: userId },
             req.body,
             { new: true }
         )
 
         if (!subject) {
-            return res.json({ "error": "Not authorized or not found" })
+            return res.status(403).json({ error: 'Not authorized or not found' })
         }
 
-        res.json({ "success": "Subject updated", subject })
+        res.json({ success: 'Subject updated', subject })
     } catch (error) {
-        res.json({ "error": "Error updating subject" })
+        console.error(error)
+        res.status(500).json({ error: 'Error updating subject' })
     }
 }
 
@@ -89,6 +93,11 @@ let deleteSubject = async (req, res) => {
         const userId = req.user.id
 
         // Find the teacher document
+        // const teacher = await teacherModel.findOne({ userId: userId })
+        // if (!teacher) {
+        //     return res.json({ "error": "Teacher profile not found" })
+        // }
+
         const teacher = await teacherModel.findOne({ userId: userId })
         if (!teacher) {
             return res.json({ "error": "Teacher profile not found" })
@@ -100,7 +109,7 @@ let deleteSubject = async (req, res) => {
         })
 
         if (!subject) {
-            return res.json({ "error": "Not authorized or not found" })
+            return res.status(403).json({ error: 'Not authorized or not found' })
         }
 
         await teacherModel.findByIdAndUpdate(
@@ -108,10 +117,11 @@ let deleteSubject = async (req, res) => {
             { $pull: { subjects: req.params.id } }
         )
 
-        res.json({ "success": "Subject deleted" })
+        res.json({ success: 'Subject deleted' })
 
     } catch (e) {
-        res.json({ "error": "Error deleting subject" })
+        console.error(e)
+        res.status(500).json({ error: 'Error deleting subject' })
     }
 }
 

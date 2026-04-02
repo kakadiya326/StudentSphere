@@ -4,7 +4,7 @@ let verifyToken = (req, res, next) => {
     try {
         let token = req.headers.authorization?.split(" ")[1]
         if (!token) {
-            return res.json({ error: "No token provided" })
+            return res.status(401).json({ "error": "No token provided" })
         }
 
         let decoded = jwt.verify(token, process.env.JWT_SECRET)
@@ -12,7 +12,8 @@ let verifyToken = (req, res, next) => {
         req.user = decoded
         next()
     } catch (e) {
-        return res.json({ error: "Invalid token" })
+        console.error('Auth error:', e)
+        return res.status(401).json({ "error": "Invalid token" })
     }
 }
 
