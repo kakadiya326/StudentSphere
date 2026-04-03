@@ -41,7 +41,7 @@ let updateStudentProfile = async (req, res) => {
 // ✅ Get Profile
 let getStudentProfile = async (req, res) => {
     try {
-        const student = await studentModel.findById(req.user.id).populate('_id', 'name email')
+        const student = await studentModel.findById(req.user.id).populate('_id', 'name email profilePic')
 
         res.json({ student })
 

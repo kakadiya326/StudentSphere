@@ -139,7 +139,7 @@ const Dashboard = () => {
                                 </p>
 
                                 <button
-                                    onClick={() => navigate(`/teacher/subjects/${subject._id}`)}
+                                    // onClick={() => navigate(`/teacher/subjects/${subject._id}`)}
                                     style={{
                                         marginTop: '10px',
                                         padding: '8px 12px',

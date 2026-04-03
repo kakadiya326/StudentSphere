@@ -151,6 +151,79 @@
     cursor: pointer;
 }
 
+/* Profile Image */
+.profile-picture-section img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 12px;
+    display: block;
+    border: 3px solid #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Edit Profile Button */
+.edit-profile-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border: 3px solid white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -40px auto 16px auto;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+.edit-profile-btn:hover {
+    transform: scale(1.15);
+    background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
+    box-shadow: 0 6px 16px rgba(0, 86, 179, 0.3);
+}
+
+.edit-profile-btn:active {
+    transform: scale(0.95);
+}
+
+.profile-picture-button-group {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.profile-picture-button-group .btn-save,
+.profile-picture-button-group .btn-cancel {
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.profile-picture-button-group .btn-save {
+    background-color: #007bff;
+    color: white;
+}
+
+.profile-picture-button-group .btn-cancel {
+    background-color: #6c757d;
+    color: white;
+}
+
+.profile-picture-button-group .btn-save:disabled,
+.profile-picture-button-group .btn-cancel:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
 .profile-name {
     font-size: 20px;
     font-weight: 600;
@@ -345,6 +418,117 @@
     font-weight: 500;
 }
 
+/* Subjects management styles */
+.subjects-page {
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.subject-header {
+    margin-bottom: 18px;
+}
+
+.subject-header h2 {
+    margin-bottom: 6px;
+}
+
+.subject-controls,
+.subject-list {
+    margin-bottom: 20px;
+}
+
+.subject-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.subject-form input {
+    padding: 10px 12px;
+    flex: 1;
+    min-width: 170px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.subject-form button {
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 10px 18px;
+    cursor: pointer;
+}
+
+.subject-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.subject-card h4 {
+    margin: 0 0 4px;
+}
+
+.subject-card p {
+    margin: 0;
+}
+
+.grey-text {
+    color: #666;
+    font-size: 13px;
+}
+
+.subject-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.subject-actions button {
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+
+.btn-save {
+    background-color: #28a745;
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 35px;
+    color: #666;
+}
 /* Recent Activity */
 .activity-list {
     display: flex;

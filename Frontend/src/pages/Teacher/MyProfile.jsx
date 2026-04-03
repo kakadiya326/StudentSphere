@@ -1,23 +1,82 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getTeacherProfile, updateTeacherProfile } from '../../services/teacherService'
 import Toast from '../../components/Toast'
 import '../../styles/Profile.css'
 import { removeToken } from '../../utils/storage'
+import api from '../../services/api'
 
 const MyProfile = () => {
+    const fileInputRef = useRef()
     const navigate = useNavigate()
     const [profile, setProfile] = useState({})
     const [form, setForm] = useState({ department: '' })
     const [message, setMessage] = useState("")
     const [type, setType] = useState("")
     const [loading, setLoading] = useState(true)
+    const [preview, setPreview] = useState(null)
+    const [selectedFile, setSelectedFile] = useState(null)
+    const [uploadedProfilePic, setUploadedProfilePic] = useState(null)
+    const [uploading, setUploading] = useState(false)
+    const [imageError, setImageError] = useState(false)
     console.log(profile);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+        setSelectedFile(file)
+        setPreview(URL.createObjectURL(file))
+        setImageError(false)
+    }
+
+    const saveProfilePic = () => {
+        if (!selectedFile) return
+
+        setUploading(true)
+        const formData = new FormData()
+        formData.append("profilePic", selectedFile)
+
+        api.post(
+            "/auth/upload-profile-pic",
+            formData
+        )
+            .then((res) => {
+                setMessage("Profile picture updated successfully")
+                setType("success")
+                setSelectedFile(null)
+                setPreview(null)
+                setImageError(false)
+
+                const newPic = res.data.profilePicPath
+                if (newPic) {
+                    setUploadedProfilePic(newPic)
+                }
+
+                fetchProfile()
+            })
+            .catch((error) => {
+                console.log(error)
+                setMessage(error.response?.data?.message || "Error uploading profile picture")
+                setType("error")
+            })
+            .finally(() => {
+                setUploading(false)
+            })
+    }
+
+    const cancelProfilePic = () => {
+        setSelectedFile(null)
+        setPreview(null)
+        setImageError(false)
+        if (fileInputRef.current) fileInputRef.current.value = ''
+    }
 
     const fetchProfile = () => {
         setLoading(true)
         getTeacherProfile()
             .then((res) => {
+                console.log('dataaaaaaaaa', res.data);
+
                 setProfile(res.data.teacher || {})
                 setForm({ department: res.data.teacher?.department || '' })
                 setLoading(false)
@@ -76,6 +135,10 @@ const MyProfile = () => {
             })
     }
 
+    const profilePicUrl = profile.userId?.profilePic ? `http://localhost:5000/profilePics/${profile.userId.profilePic}?t=${Date.now()}` : null
+    const uploadedPicUrl = uploadedProfilePic ? `http://localhost:5000/profilePics/${uploadedProfilePic}?t=${Date.now()}` : null
+    const imageUrl = !imageError ? (preview || uploadedPicUrl || profilePicUrl) : null
+
     if (loading) {
         return <div style={{ padding: '20px' }}>Loading...</div>
     }
@@ -108,8 +171,52 @@ const MyProfile = () => {
                 <div className="profile-sidebar">
                     <div className="profile-picture-section">
                         <div className="profile-picture">
-                            {profile.userId ? profile.userId.name.charAt(0).toUpperCase() : '👤'}
+                            {imageUrl ? (
+                                <img
+                                    src={imageUrl}
+                                    alt="Profile"
+                                    onError={() => setImageError(true)}
+                                />
+                            ) : (
+                                profile.userId?.name ? profile.userId.name.charAt(0).toUpperCase() : '👤'
+                            )}
                         </div>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            style={{ display: "none" }}
+                            onChange={handleFileChange}
+                        />
+                        <button
+                            className="edit-profile-btn"
+                            title="Select New Profile Picture"
+                            onClick={() => fileInputRef.current.click()}
+                        >
+                            ✏️
+                        </button>
+
+                        {selectedFile && (
+                            <div className="profile-picture-button-group">
+                                <button
+                                    type="button"
+                                    className="btn-save"
+                                    onClick={saveProfilePic}
+                                    disabled={uploading}
+                                >
+                                    {uploading ? 'Saving...' : 'Save Picture'}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn-cancel"
+                                    onClick={cancelProfilePic}
+                                    disabled={uploading}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+
                         <h3 className="profile-name">{profile.userId?.name || 'Teacher'}</h3>
                         <p className="profile-role">Teacher</p>
                     </div>

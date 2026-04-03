@@ -9,7 +9,7 @@ export const getSubjects = () => {
 }
 
 export const updateSubject = (newData, subjectID) => {
-    return api.put(`/teacher/subject/${subjectID}`);
+    return api.put(`/teacher/subject/${subjectID}`, newData);
 }
 
 export const deleteSubject = (subjectID) => {

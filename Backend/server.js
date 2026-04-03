@@ -14,6 +14,7 @@ app.use(express.urlencoded({ extended: true }))
 
 // Serve uploads directory statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+app.use('/profilePics', express.static(path.join(__dirname, 'profilePics')))
 
 app.use('/', route)
 

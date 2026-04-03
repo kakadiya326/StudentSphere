@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createSubject, getSubjects } from '../../services/subjectService';
+import { createSubject, getSubjects, updateSubject, deleteSubject } from '../../services/subjectService';
 import Toast from '../../components/Toast';
 
 const Subjects = () => {
   const navigate = useNavigate()
-  const [form, setForm] = useState({
-    name: "",
-    code: ""
-  })
-
-  const [subjects, setSubjects] = useState([]);
-  const [message, setMessage] = useState("");
-  const [type, setType] = useState("");
+  const [form, setForm] = useState({ name: '', code: '' })
+  const [subjects, setSubjects] = useState([])
+  const [message, setMessage] = useState('')
+  const [type, setType] = useState('')
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm] = useState({ name: '', code: '' })
 
   const fetchSubjects = async () => {
     try {
       const res = await getSubjects()
       setSubjects(res.data.subjects)
     } catch {
-      setMessage("Failed to load subjects");
-      setType("error");
+      setMessage('Failed to load subjects')
+      setType('error')
     }
   }
 
@@ -33,75 +31,158 @@ const Subjects = () => {
   }
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
+    if (!form.name.trim() || !form.code.trim()) {
+      setMessage('Please fill both name and code.')
+      setType('error')
+      return
+    }
 
     try {
-      let res = await createSubject(form);
-
-      setMessage(res.data.success||res.data.error);
-      setType(res.data.success?"success":"error");
-      setForm({ name: "", code: "" })
-      fetchSubjects();
+      let res = await createSubject(form)
+      setMessage(res.data.success || res.data.error)
+      setType(res.data.success ? 'success' : 'error')
+      setForm({ name: '', code: '' })
+      fetchSubjects()
     } catch {
-      setMessage("Failed to add subject")
-      setType("error")
+      setMessage('Failed to add subject')
+      setType('error')
     }
   }
+
+  const startEdit = (subject) => {
+    setEditingId(subject._id)
+    setEditForm({ name: subject.name, code: subject.code })
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditForm({ name: '', code: '' })
+  }
+
+  const handleEditChange = (event) => {
+    setEditForm({ ...editForm, [event.target.name]: event.target.value })
+  }
+
+  const handleUpdate = async (subjectId) => {
+    if (!editForm.name.trim() || !editForm.code.trim()) {
+      setMessage('Please fill both name and code.')
+      setType('error')
+      return
+    }
+
+    try {
+      const res = await updateSubject(editForm, subjectId)
+      setMessage(res.data.success || res.data.error)
+      setType(res.data.success ? 'success' : 'error')
+      setEditingId(null)
+      fetchSubjects()
+    } catch {
+      setMessage('Failed to update subject')
+      setType('error')
+    }
+  }
+
+  const handleDelete = async (subjectId) => {
+    const confirmed = window.confirm('Delete this subject? This action cannot be undone.')
+    if (!confirmed) return
+
+    try {
+      const res = await deleteSubject(subjectId)
+      setMessage(res.data.success || res.data.error)
+      setType(res.data.success ? 'success' : 'error')
+      fetchSubjects()
+    } catch {
+      setMessage('Failed to delete subject')
+      setType('error')
+    }
+  }
+
   return (
-    <div>
-      <h2>Subjects</h2>
-      <Toast
-        msgText={message}
-        msgType={type}
-        clearMessage={() => setMessage("")}
-      />
+    <div className='subjects-page'>
+      <div className='subject-header'>
+        <h2>Subject Management</h2>
+        <p>Create, edit, and delete your course subjects in one place.</p>
+      </div>
 
-      <form method='post' onSubmit={handleSubmit}>
-        <input type="text" name='name' placeholder='Subject Name' value={form.name} onChange={handleChange} />
-        <input type="text" name='code' placeholder='Subject Code' value={form.code} onChange={handleChange} />
-        <button type='submit'>Add Subject</button>
-      </form>
+      <Toast msgText={message} msgType={type} clearMessage={() => setMessage('')} />
 
-      {/* Subject List */}
-      <div style={{ marginTop: '30px' }}>
-        <h3>Your Subjects</h3>
+      <div className='subject-controls'>
+        <form className='subject-form' onSubmit={handleSubmit}>
+          <input
+            type='text'
+            name='name'
+            placeholder='Subject Name'
+            value={form.name}
+            onChange={handleChange}
+          />
+          <input
+            type='text'
+            name='code'
+            placeholder='Subject Code'
+            value={form.code}
+            onChange={handleChange}
+          />
+          <button type='submit'>Add Subject</button>
+        </form>
+      </div>
+
+      <div className='subject-list'>
         {subjects && subjects.length > 0 ? (
-          <div style={{ display: 'grid', gap: '15px' }}>
-            {subjects.map((subject) => (
-              <div key={subject._id} style={{
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                padding: '20px',
-                backgroundColor: 'white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <div>
-                  <h4 style={{ margin: '0 0 5px 0' }}>{subject.name}</h4>
-                  <p style={{ margin: '0', color: '#666' }}>Code: {subject.code}</p>
+          subjects.map((subject) => (
+            <div key={subject._id} className='subject-card'>
+              {editingId === subject._id ? (
+                <div className='subject-edit'>
+                  <input
+                    type='text'
+                    name='name'
+                    value={editForm.name}
+                    onChange={handleEditChange}
+                  />
+                  <input
+                    type='text'
+                    name='code'
+                    value={editForm.code}
+                    onChange={handleEditChange}
+                  />
+                  <div className='subject-actions'>
+                    <button className='btn-save' onClick={() => handleUpdate(subject._id)}>
+                      Save
+                    </button>
+                    <button className='btn-cancel' onClick={cancelEdit}>
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => navigate(`/teacher/subjects/${subject._id}/lessons`)}
-                  style={{
-                    padding: '10px 20px',
-                    backgroundColor: '#007bff',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  📚 Manage Lessons
-                </button>
-              </div>
-            ))}
-          </div>
+              ) : (
+                <>
+                  <div>
+                      <h4>{subject.name}</h4>
+                      <p>Code: {subject.code}</p>
+                      <p className='grey-text'>Teacher: {subject.teacherId?.userId?.name || 'N/A'}</p>
+                    </div>
+                    <div className='subject-actions'>
+                      <button className='btn-secondary' onClick={() => startEdit(subject)}>
+                        Edit
+                      </button>
+                      <button className='btn-danger' onClick={() => handleDelete(subject._id)}>
+                        Delete
+                      </button>
+                      <button
+                        className='btn-primary'
+                        onClick={() => navigate(`/teacher/subjects/${subject._id}/lessons`)}
+                      >
+                        Manage Lessons
+                      </button>
+                    </div>
+                </>
+              )}
+            </div>
+          ))
         ) : (
-          <p style={{ textAlign: 'center', color: '#666', padding: '40px' }}>
-            No subjects created yet. Add your first subject above.
-          </p>
+            <div className='empty-state'>
+              <p>No subjects yet. Use the form above to create your first subject.</p>
+            </div>
         )}
       </div>
     </div>

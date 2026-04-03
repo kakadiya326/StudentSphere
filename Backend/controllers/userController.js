@@ -1,6 +1,8 @@
 let bcrypt = require('bcrypt')
 let jwt = require('jsonwebtoken');
 const userModel = require('../models/userModel');
+const fs = require('fs')
+const path = require('path')
 
 let register = async (req, res) => {
     try {
@@ -37,7 +39,6 @@ let login = async (req, res) => {
         // if (!isMatch) {
         //     return res.status(401).json({ "warning": "Password not matched." })
         // }
-        console.log({ id: user._id, role: user.role, name: user.name });
         let token = await jwt.sign({ id: user._id, role: user.role, name: user.name, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN })
         res.json({ "success": "Login success", "userData": { ...user._doc, "password": "" }, token })
     } catch (e) {
@@ -46,4 +47,42 @@ let login = async (req, res) => {
     }
 }
 
-module.exports = { register, login }
+const uploadProfilePic = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ "error": 'No file uploaded' })
+        }
+
+        const userId = req.user?.id || req.body.id
+        if (!userId) {
+            return res.status(400).json({ "error": 'User id missing' })
+        }
+
+        const user = await userModel.findById(userId);
+        if (!user) return res.status(404).json({ "error": "User not found." })
+        console.log(user);
+        if (user.profilePic) {
+            const oldPath = path.join(__dirname, '../profilePics', user.profilePic)
+            if (fs.existsSync(oldPath)) {
+                fs.unlinkSync(oldPath)
+                console.log('Old image deleted:', user.profilePic)
+            } else {
+                console.log('else part Old image deleted:', user.profilePic)
+            }
+
+        }
+
+        const profilePicPath = req.file.filename
+
+        // await userModel.findByIdAndUpdate(userId, { profilePic: profilePicPath })
+        user.profilePic = profilePicPath
+        await user.save();
+
+        res.json({ "success": 'Profile picture uploaded successfully', profilePicPath })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ "error": 'Error uploading profile picture' })
+    }
+}
+
+module.exports = { register, login, uploadProfilePic }

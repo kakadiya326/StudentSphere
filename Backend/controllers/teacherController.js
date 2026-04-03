@@ -2,7 +2,7 @@ const teacherModel = require('../models/teacherModel')
 
 let getProfile = async (req, res) => {
     try {
-        const teacher = await teacherModel.findOne({ userId: req.user.id }).populate('userId', 'name email').populate('subjects')
+        const teacher = await teacherModel.findOne({ userId: req.user.id }).populate('userId', 'name email profilePic').populate('subjects')
 
         res.json({ teacher })
 
@@ -13,6 +13,7 @@ let getProfile = async (req, res) => {
 
 let profileUpdate = async (req, res) => {
     try {
+
         const teacher = await teacherModel.findOneAndUpdate(
             { userId: req.user.id },
             { ...req.body, userId: req.user.id },
@@ -20,7 +21,7 @@ let profileUpdate = async (req, res) => {
                 new: true,
                 upsert: true
             }
-        ).populate('userId', 'name email').populate('subjects')
+        ).populate('userId', 'name email profilePic').populate('subjects')
 
         res.json({
             "success": "Profile updated",

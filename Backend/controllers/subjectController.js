@@ -57,8 +57,6 @@ let getSubjects = async (req, res) => {
                     select: "name email"
                 }
             })
-
-        console.log(subjects);
         res.json({ subjects })
 
     } catch (error) {
@@ -156,7 +154,6 @@ let mySubjects = async (req, res) => {
                     }
                 }
             })
-        console.log(student);
 
         res.json({ "success": "All enrolled subjects fetched", "subjects": student.courseIds, "progress": student.progress })
     } catch (error) {
