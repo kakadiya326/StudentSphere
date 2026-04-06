@@ -40,13 +40,16 @@ const sendOTP = async (req, res) => {
             ExpiresAt: Date.now() + 5 * 60 * 1000
         });
 
-        // For testing - skip actual email sending
-        console.log('TEST MODE: Would send OTP', otp, 'to', email);
+        const emailSent = await sendOTPEmail(normalizedEmail, otp);
+        if (!emailSent) {
+            return res.status(500).json({ "error": "Failed to send OTP email. Please try again later." });
+        }
+
         return res.json({ "success": "OTP sent successfully", "otpFlag": true });
 
     } catch (err) {
         console.log(err);
-        res.json({ "error": "Failed to send OTP" });
+        res.status(500).json({ "error": "Failed to send OTP" });
     }
 };
 
