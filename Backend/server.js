@@ -16,6 +16,14 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use('/profilePics', express.static(path.join(__dirname, 'profilePics')))
 
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../Frontend/dist')))
+
+// Catch all handler: send back React's index.html file for client-side routing
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'))
+})
+
 app.use('/', route)
 
 // Connect DB and then start server
