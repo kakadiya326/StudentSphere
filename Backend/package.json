@@ -16,7 +16,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && node server.js",
-    "build": "cd ../Frontend && npm install && npm run build"
+    "build": "cd ../Frontend && npm install && npx vite build"
   },
   "author": "",
   "license": "ISC",
