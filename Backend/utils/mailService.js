@@ -2,13 +2,27 @@ const nodemailer = require('nodemailer');
 const getEmailTemplate = require('../utils/emailTamplate');
 
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.ADMIN_MAIL,
         pass: process.env.ADMIN_PASSWORD,
     },
+    requireTLS: true,
+    tls: {
+        rejectUnauthorized: false,
+    },
+    logger: true,
+    debug: true,
+});
+
+transporter.verify((error, success) => {
+    if (error) {
+        console.error('Mailer verification failed:', error);
+    } else {
+        console.log('Mailer is ready to send messages:', success);
+    }
 });
 
 let sendOTPEmail = async (to, otp) => {
@@ -20,8 +34,9 @@ let sendOTPEmail = async (to, otp) => {
 
         const mailOptions = {
             from: `"Kakadiya Chiranj" <${process.env.ADMIN_MAIL}>`,
-            to: to,
+            to,
             subject: "Email Verification",
+            text: `Your OTP is ${otp}. It is valid for 5 minutes.`,
             html: getEmailTemplate(otp),
         }
 
