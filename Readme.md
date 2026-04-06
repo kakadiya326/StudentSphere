@@ -1,16 +1,12 @@
 # File Tree: StudentSphere
 
-**Generated:** 3/27/2026, 3:46:52 PM
+**Generated:** 4/6/2026, 11:05:21 AM
 **Root Path:** `d:\vector\StudentSphere`
 
 ```
 ├── 📁 Backend
-│   ├── 📁 control
-│   │   ├── 📄 lessonCon.js
-│   │   ├── 📄 studentCon.js
-│   │   ├── 📄 subjectCon.js
-│   │   └── 📄 teacherCon.js
 │   ├── 📁 controllers
+│   │   ├── 📄 lessonController.js
 │   │   ├── 📄 studentController.js
 │   │   ├── 📄 subjectController.js
 │   │   ├── 📄 teacherController.js
@@ -19,6 +15,7 @@
 │   │   ├── 📄 auth.js
 │   │   ├── 📄 checkRole.js
 │   │   ├── 📄 sendOTP.js
+│   │   ├── 📄 uploadFile.js
 │   │   └── 📄 verifyMail.js
 │   ├── 📁 models
 │   │   ├── 📄 counterModel.js
@@ -30,75 +27,92 @@
 │   │   ├── 📄 submissionModel.js
 │   │   ├── 📄 teacherModel.js
 │   │   └── 📄 userModel.js
+│   ├── 📁 profilePics
+│   │   ├── 🖼️ 69cff11da82af3612cd77541-Kakadiya_Chiranj.jpeg
+│   │   └── 🖼️ 69cff846f3895b0cac455456-Kakadiya_Chiranj.jpeg
 │   ├── 📁 routes
-│   │   ├── 📄 adminRoute.js
+│   │   ├── 📄 index.js
 │   │   ├── 📄 lessonRoute.js
 │   │   ├── 📄 studentRoute.js
 │   │   ├── 📄 subjectRoute.js
 │   │   ├── 📄 teacherRoute.js
 │   │   └── 📄 userRoute.js
+│   ├── 📁 uploads
 │   ├── 📁 utils
 │   │   ├── 📄 emailTamplate.js
 │   │   ├── 📄 generateOtp.js
 │   │   └── 📄 mailService.js
 │   ├── ⚙️ .gitignore
-│   ├── 📄 index.js
+│   ├── ⚙️ jsconfig.json
 │   ├── ⚙️ package-lock.json
 │   ├── ⚙️ package.json
 │   └── 📄 server.js
-└── 📁 Frontend
-    ├── 📁 public
-    │   └── 🖼️ vite.svg
-    ├── 📁 src
-    │   ├── 📁 components
-    │   │   ├── 📄 CompleteProfile.jsx
-    │   │   ├── 📄 CompleteTeacherProfile.jsx
-    │   │   ├── 📄 Navbar.jsx
-    │   │   └── 📄 Toast.jsx
-    │   ├── 📁 pages
-    │   │   ├── 📁 Auth
-    │   │   │   ├── 📄 Login.jsx
-    │   │   │   └── 📄 Register.jsx
-    │   │   ├── 📁 Student
-    │   │   │   ├── 📄 Dashboard.jsx
-    │   │   │   ├── 📄 LessonView.jsx
-    │   │   │   ├── 📄 Lessons.jsx
-    │   │   │   ├── 📄 MySubjects.jsx
-    │   │   │   ├── 📄 Profile.jsx
-    │   │   │   └── 📄 Subjects.jsx
-    │   │   ├── 📁 Teacher
-    │   │   │   ├── 📄 AssignmentGrading.jsx
-    │   │   │   ├── 📄 Dashboard.jsx
-    │   │   │   ├── 📄 LessonDetails.jsx
-    │   │   │   ├── 📄 Lessons.jsx
-    │   │   │   ├── 📄 MyProfile.jsx
-    │   │   │   └── 📄 Subjects.jsx
-    │   │   └── 📄 Dashboard.jsx
-    │   ├── 📁 routes
-    │   │   ├── 📄 AppRoutes.jsx
-    │   │   └── 📄 ProtectedRoute.jsx
-    │   ├── 📁 services
-    │   │   ├── 📄 adminService.js
-    │   │   ├── 📄 api.js
-    │   │   ├── 📄 authService.js
-    │   │   ├── 📄 lessonService.js
-    │   │   ├── 📄 studentService.js
-    │   │   ├── 📄 subjectService.js
-    │   │   └── 📄 teacherService.js
-    │   ├── 📁 utils
-    │   │   ├── 📄 auth.js
-    │   │   └── 📄 storage.js
-    │   ├── 🎨 App.css
-    │   ├── 📄 App.jsx
-    │   ├── 🎨 index.css
-    │   └── 📄 main.jsx
-    ├── ⚙️ .gitignore
-    ├── 📝 README.md
-    ├── 📄 eslint.config.js
-    ├── 🌐 index.html
-    ├── ⚙️ package-lock.json
-    ├── ⚙️ package.json
-    └── 📄 vite.config.js
+├── 📁 Frontend
+│   ├── 📁 public
+│   │   ├── 🖼️ lms.svg
+│   │   └── 🖼️ vite.svg
+│   ├── 📁 src
+│   │   ├── 📁 components
+│   │   │   ├── 📄 CompleteProfile.jsx
+│   │   │   ├── 📄 CompleteTeacherProfile.jsx
+│   │   │   ├── 📄 Navbar.jsx
+│   │   │   └── 📄 Toast.jsx
+│   │   ├── 📁 pages
+│   │   │   ├── 📁 Auth
+│   │   │   │   ├── 📄 Login.jsx
+│   │   │   │   └── 📄 Register.jsx
+│   │   │   ├── 📁 Student
+│   │   │   │   ├── 📄 Dashboard.jsx
+│   │   │   │   ├── 📄 Grades.jsx
+│   │   │   │   ├── 📄 LessonView.jsx
+│   │   │   │   ├── 📄 Lessons.jsx
+│   │   │   │   ├── 📄 Profile.jsx
+│   │   │   │   └── 📄 Subjects.jsx
+│   │   │   ├── 📁 Teacher
+│   │   │   │   ├── 📄 AssignmentGrading.jsx
+│   │   │   │   ├── 📄 Dashboard.jsx
+│   │   │   │   ├── 📄 LessonDetails.jsx
+│   │   │   │   ├── 📄 Lessons.jsx
+│   │   │   │   ├── 📄 MyProfile.jsx
+│   │   │   │   └── 📄 Subjects.jsx
+│   │   │   └── 📄 Dashboard.jsx
+│   │   ├── 📁 routes
+│   │   │   ├── 📄 AppRoutes.jsx
+│   │   │   └── 📄 ProtectedRoute.jsx
+│   │   ├── 📁 services
+│   │   │   ├── 📄 adminService.js
+│   │   │   ├── 📄 api.js
+│   │   │   ├── 📄 authService.js
+│   │   │   ├── 📄 lessonService.js
+│   │   │   ├── 📄 studentService.js
+│   │   │   ├── 📄 subjectService.js
+│   │   │   └── 📄 teacherService.js
+│   │   ├── 📁 styles
+│   │   │   ├── 🎨 Auth.css
+│   │   │   ├── 🎨 Dashboard.css
+│   │   │   ├── 🎨 Grades.css
+│   │   │   ├── 🎨 LessonView.css
+│   │   │   ├── 🎨 Lessons.css
+│   │   │   ├── 🎨 Navbar.css
+│   │   │   ├── 🎨 Profile.css
+│   │   │   ├── 🎨 Subjects.css
+│   │   │   └── 🎨 global.css
+│   │   ├── 📁 utils
+│   │   │   ├── 📄 auth.js
+│   │   │   └── 📄 storage.js
+│   │   ├── 🎨 App.css
+│   │   ├── 📄 App.jsx
+│   │   ├── 🎨 index.css
+│   │   └── 📄 main.jsx
+│   ├── ⚙️ .gitignore
+│   ├── 📝 README.md
+│   ├── 📄 eslint.config.js
+│   ├── 🌐 index.html
+│   ├── ⚙️ jsconfig.json
+│   ├── ⚙️ package-lock.json
+│   ├── ⚙️ package.json
+│   └── 📄 vite.config.js
+└── 📝 Readme.md
 ```
 
 ---

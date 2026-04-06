@@ -7,14 +7,16 @@ const path = require('path')
 let register = async (req, res) => {
     try {
         const { name, email, password } = req.body
-        let user = await userModel.findOne({ email })
+        const normalizedEmail = email?.trim().toLowerCase()
+
+        let user = await userModel.findOne({ email: normalizedEmail })
         if (user) {
             return res.status(409).json({ "warning": "User already exists." })
         } else {
             let pwdHash = await bcrypt.hash(password, 10)
             let data = new userModel({
                 name,
-                email,
+                email: normalizedEmail,
                 password: pwdHash,
                 role: req.body.role || 'student'
             })
@@ -30,7 +32,8 @@ let register = async (req, res) => {
 let login = async (req, res) => {
     try {
         const { email, password } = req.body
-        let user = await userModel.findOne({ email })
+        const normalizedEmail = email?.trim().toLowerCase()
+        let user = await userModel.findOne({ email: normalizedEmail })
         if (!user) {
             return res.status(401).json({ "warning": "User doesn't exists." })
         }

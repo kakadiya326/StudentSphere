@@ -2,7 +2,7 @@ import axios from "axios"
 import { getToken } from "../utils/storage"
 
 const api = axios.create({
-    baseURL: "https://lms-api-l8xb.onrender.com/api"
+    baseURL: "http://localhost:5000/api"
 })
 
 api.interceptors.request.use((config) => {

@@ -66,7 +66,11 @@ const StudentGrades = () => {
     const filteredSubmissions = getFilteredSubmissions()
 
     if (loading) {
-        return <div className="loading">Loading...</div>
+        return (
+            <div className="loader-overlay">
+                <div className="myspin"></div>
+            </div>
+        )
     }
 
     return (

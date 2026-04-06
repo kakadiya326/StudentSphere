@@ -3,6 +3,7 @@
     "target": "ES6",
     "module": "commonjs",
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,

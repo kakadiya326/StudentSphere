@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode"
 import Toast from '../../components/Toast'
 import { getStudentProfile } from '../../services/studentService'
 import { getTeacherProfile } from '../../services/teacherService'
+import '../../styles/Auth.css'
 
 const Login = () => {
     const [form, setForm] = useState({
@@ -107,32 +108,13 @@ const Login = () => {
         }
     }
     return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f8f9fa',
-            padding: '20px'
-        }}>
-            <div style={{
-                backgroundColor: 'white',
-                padding: '40px',
-                borderRadius: '12px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                width: '100%',
-                maxWidth: '400px'
-            }}>
-                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                    <h2 style={{
-                        color: '#007bff',
-                        margin: '0 0 10px 0',
-                        fontSize: '28px',
-                        fontWeight: '600'
-                    }}>
+        <div className="auth-container">
+            <div className="auth-card">
+                <div className="auth-header">
+                    <h2 className="auth-title">
                         📚 Welcome Back
                     </h2>
-                    <p style={{ color: '#666', margin: 0, fontSize: '16px' }}>
+                    <p className="auth-subtitle">
                         Sign in to your StudentSphere account
                     </p>
                 </div>
@@ -143,15 +125,9 @@ const Login = () => {
                     clearMessage={() => setMessage("")}
                 />
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div>
-                        <label style={{
-                            display: 'block',
-                            marginBottom: '5px',
-                            color: '#333',
-                            fontWeight: '500',
-                            fontSize: '14px'
-                        }}>
+                <form onSubmit={handleSubmit} className="auth-form">
+                    <div className="form-group">
+                        <label className="form-label">
                             Email Address
                         </label>
                         <input
@@ -161,28 +137,12 @@ const Login = () => {
                             value={form.email}
                             onChange={handleChange}
                             required
-                            style={{
-                                width: '100%',
-                                padding: '12px 16px',
-                                border: '2px solid #e0e0e0',
-                                borderRadius: '8px',
-                                fontSize: '16px',
-                                transition: 'border-color 0.3s',
-                                boxSizing: 'border-box'
-                            }}
-                            onFocus={(e) => e.target.style.borderColor = '#007bff'}
-                            onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                            className="form-input"
                         />
                     </div>
 
-                    <div>
-                        <label style={{
-                            display: 'block',
-                            marginBottom: '5px',
-                            color: '#333',
-                            fontWeight: '500',
-                            fontSize: '14px'
-                        }}>
+                    <div className="form-group">
+                        <label className="form-label">
                             Password
                         </label>
                         <input
@@ -192,72 +152,25 @@ const Login = () => {
                             value={form.password}
                             onChange={handleChange}
                             required
-                            style={{
-                                width: '100%',
-                                padding: '12px 16px',
-                                border: '2px solid #e0e0e0',
-                                borderRadius: '8px',
-                                fontSize: '16px',
-                                transition: 'border-color 0.3s',
-                                boxSizing: 'border-box'
-                            }}
-                            onFocus={(e) => e.target.style.borderColor = '#007bff'}
-                            onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                            className="form-input"
                         />
                     </div>
 
                     <button
                         type='submit'
-                        style={{
-                            width: '100%',
-                            padding: '14px',
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontSize: '16px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.3s',
-                            marginTop: '10px'
-                        }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = '#007bff'}
+                        className="btn-primary"
                     >
                         Sign In
                     </button>
                 </form>
 
-                <div style={{
-                    textAlign: 'center',
-                    marginTop: '25px',
-                    paddingTop: '20px',
-                    borderTop: '1px solid #e0e0e0'
-                }}>
-                    <p style={{ color: '#666', margin: '0 0 10px 0', fontSize: '14px' }}>
+                <div className="auth-footer">
+                    <p>
                         Don't have an account?
                     </p>
                     <button
                         onClick={() => navigate('/register')}
-                        style={{
-                            background: 'none',
-                            border: '2px solid #28a745',
-                            color: '#28a745',
-                            padding: '8px 16px',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            transition: 'all 0.3s'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = '#28a745'
-                            e.target.style.color = 'white'
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = 'transparent'
-                            e.target.style.color = '#28a745'
-                        }}
+                        className="btn-outline-success"
                     >
                         Create Account
                     </button>

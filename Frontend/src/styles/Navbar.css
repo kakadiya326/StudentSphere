@@ -125,6 +125,24 @@
     box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
+/* Additional button styles */
+.btn-secondary {
+    padding: 8px 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
 /* Mobile Menu */
 .mobile-menu-toggle {
     display: none;

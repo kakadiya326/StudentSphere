@@ -215,26 +215,125 @@
     }
 }
 
+/* Register specific styles */
+.register-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.register-card {
+    background-color: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    overflow: hidden;
+}
+
+.register-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #007bff, #28a745);
+}
+
+.register-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.register-title {
+    color: #007bff;
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.register-subtitle {
+    color: #666;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.otp-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.otp-input {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.otp-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.step-dot.active {
+    background-color: #007bff;
+}
 /* Responsive Design */
-@media (max-width: 480px) {
-    .auth-container {
+@media (max-width: 768px) {
+
+    .auth-container,
+    .register-container {
         padding: 15px;
     }
 
-    .auth-card {
+        .auth-card,
+        .register-card {
         padding: 30px 20px;
+        max-width: 100%;
     }
 
-    .auth-title {
+        .auth-title,
+        .register-title {
         font-size: 24px;
     }
 
-    .auth-subtitle {
+        .auth-subtitle,
+        .register-subtitle {
         font-size: 14px;
     }
 
     .form-input,
-    .form-select {
+        .form-select,
+        .otp-input {
         padding: 12px 14px;
         font-size: 16px;
         /* Prevent zoom on iOS */
@@ -244,5 +343,54 @@
     .btn-secondary {
         padding: 14px;
         font-size: 16px;
+    }
+.otp-container {
+    gap: 8px;
+}
+
+.otp-input {
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+}
+}
+
+@media (max-width: 480px) {
+
+    .auth-container,
+    .register-container {
+        padding: 10px;
+    }
+
+    .auth-card,
+    .register-card {
+        padding: 25px 15px;
+    }
+
+    .auth-title,
+    .register-title {
+        font-size: 22px;
+    }
+
+    .auth-subtitle,
+    .register-subtitle {
+        font-size: 14px;
+    }
+
+    .form-input,
+    .form-select {
+        padding: 12px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    .otp-input {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
     }
 }

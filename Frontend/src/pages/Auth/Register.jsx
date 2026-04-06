@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { registerUser, verifyEmail, verifyOtp } from '../../services/authService'
 import Toast from '../../components/Toast'
+import '../../styles/Auth.css'
 
 const Register = () => {
     const [form, setForm] = useState({
@@ -48,7 +49,21 @@ const Register = () => {
     const [loading, setLoading] = useState(false)
     const [otpLoading, setOtpLoading] = useState(false)
 
+    useEffect(() => {
+        console.log('Step changed to:', step)
+    }, [step])
+
     const navigate = useNavigate()
+
+    const redirectToLogin = () => {
+        setTimeout(() => navigate('/'), 2000)
+    }
+
+    const isDuplicateUserWarning = (text) => {
+        if (!text) return false
+        const normalized = text.toLowerCase()
+        return normalized.includes('already exists') || normalized.includes('please login') || normalized.includes('already registered') || normalized.includes('login instead')
+    }
 
     const handleChange = (event) => {
         setForm({
@@ -57,7 +72,10 @@ const Register = () => {
         });
     }
 
-    const sendOtp = async () => {
+    const sendOtp = async (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+
         if (!form.email.trim()) {
             setMessage("Please enter your email")
             setType("error")
@@ -73,14 +91,48 @@ const Register = () => {
 
         setOtpLoading(true)
         try {
-            await verifyEmail({ email: form.email.trim() })
+            const email = form.email.trim().toLowerCase();
+            console.log('Sending OTP request for email:', email);
+            const response = await verifyEmail({ email })
+            console.log('OTP response:', response);
+
+            // Check for warning in response
+            if (response.data.warning) {
+                setMessage(response.data.warning)
+                setType("error")
+                if (isDuplicateUserWarning(response.data.warning)) {
+                    redirectToLogin()
+                }
+                return
+            }
+
+            // Check for error in response
+            if (response.data.error) {
+                setMessage(response.data.error)
+                setType("error")
+                return
+            }
+
             setMessage("OTP sent successfully! Check your email.")
             setType("success")
-            setStep('otp')
+            // Force state update with timeout to ensure it happens after current tick
+            setTimeout(() => {
+                setStep('otp')
+                console.log('Step changed to otp')
+            }, 100)
         } catch (error) {
-            console.log(error)
-            setMessage("Failed to send OTP. Please try again.")
-            setType("error")
+            console.log('OTP send error:', error)
+            const warning = error.response?.data?.warning
+            if (warning) {
+                setMessage(warning)
+                setType("error")
+                if (isDuplicateUserWarning(warning)) {
+                    redirectToLogin()
+                }
+            } else {
+                setMessage("Failed to send OTP. Please try again.")
+                setType("error")
+            }
         } finally {
             setOtpLoading(false)
         }
@@ -95,12 +147,27 @@ const Register = () => {
 
         setOtpLoading(true)
         try {
-            await verifyOtp({ email: form.email.trim(), otp: form.otp })
+            const response = await verifyOtp({ email: form.email.trim(), otp: form.otp })
+            console.log('OTP verify response:', response);
+
+            // Check for warning or error in response
+            if (response.data.warning) {
+                setMessage(response.data.warning)
+                setType("error")
+                return
+            }
+
+            if (response.data.error) {
+                setMessage(response.data.error)
+                setType("error")
+                return
+            }
+
             setMessage("OTP verified successfully!")
             setType("success")
             setStep('form')
         } catch (error) {
-            console.log(error)
+            console.log('OTP verify error:', error)
             setMessage("Failed to verify OTP. Please try again.")
             setType("error")
         } finally {
@@ -163,43 +230,29 @@ const Register = () => {
         } catch (error) {
             console.log(error);
             if (error.response?.data?.warning) {
-                setMessage(error.response.data.warning)
+                const warningText = error.response.data.warning
+                setMessage(warningText)
+                setType("error")
+                if (isDuplicateUserWarning(warningText)) {
+                    redirectToLogin()
+                }
             } else {
                 setMessage("Registration failed. Please try again.")
+                setType("error")
             }
-            setType("error")
         } finally {
             setLoading(false)
         }
     }
 
     return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f8f9fa',
-            padding: '20px'
-        }}>
-            <div style={{
-                backgroundColor: 'white',
-                padding: '40px',
-                borderRadius: '12px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                width: '100%',
-                maxWidth: '400px'
-            }}>
-                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                    <h2 style={{
-                        color: '#007bff',
-                        margin: '0 0 10px 0',
-                        fontSize: '28px',
-                        fontWeight: '600'
-                    }}>
+        <div className="register-container">
+            <div className="register-card">
+                <div className="register-header">
+                    <h2 className="register-title">
                         📚 Join StudentSphere
                     </h2>
-                    <p style={{ color: '#666', margin: 0, fontSize: '16px' }}>
+                    <p className="register-subtitle">
                         Create your account to get started
                     </p>
                 </div>
@@ -210,325 +263,160 @@ const Register = () => {
                     clearMessage={() => setMessage("")}
                 />
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    {/* Email Field - Always shown */}
-                    <div>
-                        <label style={{
-                            display: 'block',
-                            marginBottom: '5px',
-                            color: '#333',
-                            fontWeight: '500',
-                            fontSize: '14px'
-                        }}>
-                            Email Address *
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            placeholder="Enter your email"
-                            value={form.email}
-                            onChange={handleChange}
-                            required
-                            disabled={step !== 'email'}
-                            style={{
-                                width: '100%',
-                                padding: '12px 16px',
-                                border: '2px solid #e0e0e0',
-                                borderRadius: '8px',
-                                fontSize: '16px',
-                                transition: 'border-color 0.3s',
-                                boxSizing: 'border-box',
-                                backgroundColor: step !== 'email' ? '#f8f9fa' : 'white'
-                            }}
-                            onFocus={(e) => e.target.style.borderColor = '#007bff'}
-                            onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                        />
-                    </div>
+                {/* Step Indicator */}
+                <div className="step-indicator">
+                    <div className={`step-dot ${step === 'email' ? 'active' : ''}`}></div>
+                    <div className={`step-dot ${step === 'otp' ? 'active' : ''}`}></div>
+                    <div className={`step-dot ${step === 'form' ? 'active' : ''}`}></div>
+                </div>
 
-                    {/* Send OTP Button - Only in email step */}
+                {/* Dynamic content based on step */}
+                <div key={`step-${step}`}>
+                    {/* Send OTP Button - Only in email step (outside form to prevent submission) */}
                     {step === 'email' && (
                         <button
                             onClick={sendOtp}
                             type="button"
                             disabled={otpLoading}
-                            style={{
-                                width: '100%',
-                                backgroundColor: otpLoading ? '#6c757d' : '#007bff',
-                                color: 'white',
-                                border: 'none',
-                                padding: '12px',
-                                borderRadius: '8px',
-                                fontSize: '16px',
-                                cursor: otpLoading ? 'not-allowed' : 'pointer',
-                                transition: 'background-color 0.3s'
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!otpLoading) e.target.style.backgroundColor = '#0056b3'
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!otpLoading) e.target.style.backgroundColor = '#007bff'
-                            }}
+                            className="btn-primary"
+                            style={{ marginBottom: '24px' }}
                         >
                             {otpLoading ? 'Sending OTP...' : 'Send OTP'}
                         </button>
                     )}
 
-                    {/* OTP Section - Only in otp step */}
-                    {step === 'otp' && (
-                        <div>
-                            <label style={{
-                                display: 'block',
-                                marginBottom: '5px',
-                                color: '#333',
-                                fontWeight: '500',
-                                fontSize: '14px'
-                            }}>
-                                Enter OTP *
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        {/* Email Field - Always shown */}
+                        <div className="form-group">
+                            <label className="form-label">
+                                Email Address *
                             </label>
-
-                            {/* OTP BOXES */}
-                            <div style={{
-                                display: 'flex',
-                                gap: '10px',
-                                marginBottom: '10px'
-                            }}>
-                                {[...Array(6)].map((_, index) => (
-                                    <input
-                                        className="otp-input"
-                                        key={index}
-                                        type="text"
-                                        maxLength="1"
-                                        value={otp[index] || ''}
-                                        onChange={(e) => handleOtpChange(e, index)}
-                                        onKeyDown={(e) => handleKeyDown(e, index)}
-                                        style={{
-                                            width: '45px',
-                                            height: '50px',
-                                            textAlign: 'center',
-                                            fontSize: '18px',
-                                            border: '2px solid #e0e0e0',
-                                            borderRadius: '8px',
-                                            transition: 'border-color 0.3s'
-                                        }}
-                                        onFocus={(e) => e.target.style.borderColor = '#007bff'}
-                                        onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                                    />
-                                ))}
-                            </div>
-
-                            {/* VERIFY OTP BUTTON */}
-                            <button
-                                onClick={verifyOtpCode}
-                                type="button"
-                                disabled={otpLoading}
-                                style={{
-                                    width: '100%',
-                                    backgroundColor: otpLoading ? '#6c757d' : '#007bff',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '10px',
-                                    borderRadius: '8px',
-                                    fontSize: '14px',
-                                    cursor: otpLoading ? 'not-allowed' : 'pointer',
-                                    transition: 'background-color 0.3s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!otpLoading) e.target.style.backgroundColor = '#0056b3'
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!otpLoading) e.target.style.backgroundColor = '#007bff'
-                                }}
-                            >
-                                {otpLoading ? 'Verifying...' : 'Verify OTP'}
-                            </button>
+                            <input
+                                type="email"
+                                name="email"
+                                placeholder="Enter your email"
+                                value={form.email}
+                                onChange={handleChange}
+                                required
+                                disabled={step !== 'email'}
+                                className="form-input"
+                                style={{ backgroundColor: step !== 'email' ? '#f8f9fa' : 'white' }}
+                            />
                         </div>
-                    )}
 
-                    {/* Rest of form - Only after OTP verification */}
-                    {step === 'form' && (
-                        <>
-                            <div>
-                                <label style={{
-                                    display: 'block',
-                                    marginBottom: '5px',
-                                    color: '#333',
-                                    fontWeight: '500',
-                                    fontSize: '14px'
-                                }}>
-                                    Full Name *
+                        {/* OTP Section - Only in otp step */}
+                        {step === 'otp' && (
+                            <div className="form-group">
+                                <label className="form-label">
+                                    Enter OTP *
                                 </label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    placeholder="Enter your full name"
-                                    value={form.name}
-                                    onChange={handleChange}
-                                    required
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px 16px',
-                                        border: '2px solid #e0e0e0',
-                                        borderRadius: '8px',
-                                        fontSize: '16px',
-                                        transition: 'border-color 0.3s',
-                                        boxSizing: 'border-box'
-                                    }}
-                                    onFocus={(e) => e.target.style.borderColor = '#007bff'}
-                                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{
-                                    display: 'block',
-                                    marginBottom: '5px',
-                                    color: '#333',
-                                    fontWeight: '500',
-                                    fontSize: '14px'
-                                }}>
-                                    I am a *
-                                </label>
-                                <select
-                                    name="role"
-                                    value={form.role}
-                                    onChange={handleChange}
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px 16px',
-                                        border: '2px solid #e0e0e0',
-                                        borderRadius: '8px',
-                                        fontSize: '16px',
-                                        backgroundColor: 'white',
-                                        cursor: 'pointer',
-                                        boxSizing: 'border-box'
-                                    }}
+                                <div className="otp-container">
+                                    {[...Array(6)].map((_, index) => (
+                                        <input
+                                            className="otp-input"
+                                            key={index}
+                                            type="text"
+                                            maxLength="1"
+                                            value={otp[index] || ''}
+                                            onChange={(e) => handleOtpChange(e, index)}
+                                            onKeyDown={(e) => handleKeyDown(e, index)}
+                                        />
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={verifyOtpCode}
+                                    type="button"
+                                    disabled={otpLoading}
+                                    className="btn-primary"
+                                    style={{ marginTop: '16px' }}
                                 >
-                                    <option value="student">Student</option>
-                                    <option value="teacher">Teacher</option>
-                                </select>
+                                    {otpLoading ? 'Verifying...' : 'Verify OTP'}
+                                </button>
                             </div>
+                        )}
 
-                            <div>
-                                <label style={{
-                                    display: 'block',
-                                    marginBottom: '5px',
-                                    color: '#333',
-                                    fontWeight: '500',
-                                    fontSize: '14px'
-                                }}>
-                                    Password *
-                                </label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    placeholder="Create a password (min 6 characters)"
-                                    value={form.password}
-                                    onChange={handleChange}
-                                    required
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px 16px',
-                                        border: '2px solid #e0e0e0',
-                                        borderRadius: '8px',
-                                        fontSize: '16px',
-                                        transition: 'border-color 0.3s',
-                                        boxSizing: 'border-box'
-                                    }}
-                                    onFocus={(e) => e.target.style.borderColor = '#007bff'}
-                                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                                />
-                            </div>
+                        {/* Rest of form - Only after OTP verification */}
+                        {step === 'form' && (
+                            <>
+                                <div className="form-group">
+                                    <label className="form-label">
+                                        Full Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        placeholder="Enter your full name"
+                                        value={form.name}
+                                        onChange={handleChange}
+                                        required
+                                        className="form-input"
+                                    />
+                                </div>
 
-                            <div>
-                                <label style={{
-                                    display: 'block',
-                                    marginBottom: '5px',
-                                    color: '#333',
-                                    fontWeight: '500',
-                                    fontSize: '14px'
-                                }}>
-                                    Confirm Password *
-                                </label>
-                                <input
-                                    type="password"
-                                    name="confirmPassword"
-                                    placeholder="Confirm your password"
-                                    value={form.confirmPassword}
-                                    onChange={handleChange}
-                                    required
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px 16px',
-                                        border: '2px solid #e0e0e0',
-                                        borderRadius: '8px',
-                                        fontSize: '16px',
-                                        transition: 'border-color 0.3s',
-                                        boxSizing: 'border-box'
-                                    }}
-                                    onFocus={(e) => e.target.style.borderColor = '#007bff'}
-                                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                                />
-                            </div>
+                                <div className="form-group">
+                                    <label className="form-label">
+                                        I am a *
+                                    </label>
+                                    <select
+                                        name="role"
+                                        value={form.role}
+                                        onChange={handleChange}
+                                        className="form-select"
+                                    >
+                                        <option value="student">Student</option>
+                                        <option value="teacher">Teacher</option>
+                                    </select>
+                                </div>
 
-                            <button
-                                type='submit'
-                                disabled={loading}
-                                style={{
-                                    width: '100%',
-                                    padding: '14px',
-                                    backgroundColor: loading ? '#6c757d' : '#28a745',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    fontSize: '16px',
-                                    fontWeight: '600',
-                                    cursor: loading ? 'not-allowed' : 'pointer',
-                                    transition: 'background-color 0.3s',
-                                    marginTop: '10px'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!loading) e.target.style.backgroundColor = '#218838'
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!loading) e.target.style.backgroundColor = '#28a745'
-                                }}
-                            >
-                                {loading ? 'Creating Account...' : 'Create Account'}
-                            </button>
-                        </>
-                    )}
-                </form>
+                                <div className="form-group">
+                                    <label className="form-label">
+                                        Password *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        placeholder="Create a password (min 6 characters)"
+                                        value={form.password}
+                                        onChange={handleChange}
+                                        required
+                                        className="form-input"
+                                    />
+                                </div>
 
-                <div style={{
-                    textAlign: 'center',
-                    marginTop: '25px',
-                    paddingTop: '20px',
-                    borderTop: '1px solid #e0e0e0'
-                }}>
-                    <p style={{ color: '#666', margin: '0 0 10px 0', fontSize: '14px' }}>
+                                <div className="form-group">
+                                    <label className="form-label">
+                                        Confirm Password *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        placeholder="Confirm your password"
+                                        value={form.confirmPassword}
+                                        onChange={handleChange}
+                                        required
+                                        className="form-input"
+                                    />
+                                </div>
+
+                                <button
+                                    type='submit'
+                                    disabled={loading}
+                                    className="btn-secondary"
+                                >
+                                    {loading ? 'Creating Account...' : 'Create Account'}
+                                </button>
+                            </>
+                        )}
+                    </form>
+                </div>
+
+                <div className="auth-footer">
+                    <p>
                         Already have an account?
                     </p>
                     <button
                         onClick={() => navigate('/')}
-                        style={{
-                            background: 'none',
-                            border: '2px solid #007bff',
-                            color: '#007bff',
-                            padding: '8px 16px',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            transition: 'all 0.3s'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = '#007bff'
-                            e.target.style.color = 'white'
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = 'transparent'
-                            e.target.style.color = '#007bff'
-                        }}
+                        className="btn-outline"
                     >
                         Sign In Instead
                     </button>

@@ -140,7 +140,11 @@ const MyProfile = () => {
     const imageUrl = !imageError ? (preview || uploadedPicUrl || profilePicUrl) : null
 
     if (loading) {
-        return <div style={{ padding: '20px' }}>Loading...</div>
+        return (
+            <div className="loader-overlay">
+                <div className="myspin"></div>
+            </div>
+        )
     }
 
     return (

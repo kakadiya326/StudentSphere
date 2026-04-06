@@ -29,7 +29,11 @@ const Dashboard = () => {
     }
 
     if (loading) {
-        return <div>Loading...</div>
+        return (
+            <div className="loader-overlay">
+                <div className="myspin"></div>
+            </div>
+        )
     }
 
     return (

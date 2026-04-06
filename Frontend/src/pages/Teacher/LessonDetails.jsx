@@ -117,7 +117,11 @@ const LessonDetails = () => {
     }
 
     if (loading) {
-        return <div style={{ padding: '20px' }}>Loading...</div>
+        return (
+            <div className="loader-overlay">
+                <div className="myspin"></div>
+            </div>
+        )
     }
 
     if (!lesson) {

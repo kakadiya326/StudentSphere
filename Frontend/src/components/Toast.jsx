@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import '../styles/global.css'
 
 const Toast = ({ msgText, msgType, clearMessage }) => {
     useEffect(() => {
@@ -11,16 +12,7 @@ const Toast = ({ msgText, msgType, clearMessage }) => {
 
     if (!msgText) return null
     return (
-        // <div className={type == "success" ? "success" : "error"}>
-        <div style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            padding: "10px 20px",
-            backgroundColor: msgType === "error" ? "#ff4d4f" : "#52c41a",
-            color: "#fff",
-            borderRadius: "5px"
-        }}>
+        <div className={`toast ${msgType}`}>
             {msgText}
         </div>
     )

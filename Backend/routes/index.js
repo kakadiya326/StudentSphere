@@ -7,6 +7,9 @@ const verifyToken = require('../middleware/auth')
 
 let route = express.Router()
 
+route.get('/', (req, res) => {
+    res.send('Welcome to StudentSphere API')
+})
 route.use('/api/auth', userRoute)
 route.use('/api/student', verifyToken, checkRole('student'), studentRoute)
 route.use('/api/teacher', verifyToken, checkRole('teacher'), teacherRoute)
