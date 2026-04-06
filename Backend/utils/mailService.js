@@ -13,6 +13,10 @@ const transporter = nodemailer.createTransport({
 
 let sendOTPEmail = async (to, otp) => {
     try {
+        if (!process.env.ADMIN_MAIL || !process.env.ADMIN_PASSWORD) {
+            console.error('Mail service not configured: ADMIN_MAIL or ADMIN_PASSWORD is missing.');
+            return false;
+        }
 
         const mailOptions = {
             from: `"Kakadiya Chiranj" <${process.env.ADMIN_MAIL}>`,
@@ -22,15 +26,17 @@ let sendOTPEmail = async (to, otp) => {
         }
 
         let info = await transporter.sendMail(mailOptions);
+        console.log('Mail send result:', info);
 
-        if (info.accepted.length > 0 && info.rejected.length === 0) {
+        if (Array.isArray(info.accepted) && info.accepted.length > 0 && (!info.rejected || info.rejected.length === 0)) {
             return true;
-        } else {
-            return false;
         }
+
+        console.error('OTP email not accepted:', info);
+        return false;
     }
     catch (error) {
-        console.log(error);
+        console.error('Error sending OTP email:', error);
         return false;
     }
 }

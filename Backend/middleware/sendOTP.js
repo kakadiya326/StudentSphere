@@ -34,7 +34,7 @@ const sendOTP = async (req, res) => {
         await otpModel.deleteMany({ email: normalizedEmail });
 
         // Save new OTP
-        await otpModel.create({
+        const otpRecord = await otpModel.create({
             email: normalizedEmail,
             otp: otp,
             ExpiresAt: Date.now() + 5 * 60 * 1000
@@ -42,7 +42,8 @@ const sendOTP = async (req, res) => {
 
         const emailSent = await sendOTPEmail(normalizedEmail, otp);
         if (!emailSent) {
-            return res.status(500).json({ "error": "Failed to send OTP email. Please try again later." });
+            await otpModel.deleteOne({ _id: otpRecord._id });
+            return res.status(500).json({ "error": "Failed to send OTP email. Please verify email configuration and try again." });
         }
 
         return res.json({ "success": "OTP sent successfully", "otpFlag": true });
